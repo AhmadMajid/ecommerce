@@ -8,6 +8,7 @@ class CategoriesController < ApplicationController
 
   def show
     @products = Product.active.includes(:category, images_attachments: :blob)
+    @categories = Category.active.includes(:parent)
 
     # Include products from subcategories
     category_ids = [@category.id] + @category.descendant_ids
