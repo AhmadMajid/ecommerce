@@ -1,0 +1,60 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Change your password
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Enter your new password below
+      </p>
+    </div>
+
+    <%= form_with model: resource, as: resource_name, url: password_path(resource_name),
+                  method: :put, local: true, class: "mt-8 space-y-6" do |f| %>
+
+      <%= f.hidden_field :reset_password_token %>
+
+      <div class="rounded-md shadow-sm space-y-4">
+        <!-- New Password -->
+        <div>
+          <%= f.label :password, "New password", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field :password,
+              class: "mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm",
+              placeholder: "New password",
+              required: true,
+              autofocus: true %>
+          <% if resource.errors[:password].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password].first %></p>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-500">
+              <%= @minimum_password_length %> characters minimum
+            </p>
+          <% end %>
+        </div>
+
+        <!-- Password Confirmation -->
+        <div>
+          <%= f.label :password_confirmation, "Confirm new password", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field :password_confirmation,
+              class: "mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm",
+              placeholder: "Confirm new password",
+              required: true %>
+          <% if resource.errors[:password_confirmation].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password_confirmation].first %></p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <%= f.submit "Change Password",
+            class: "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors" %>
+      </div>
+
+      <!-- Additional Links -->
+      <div class="text-center space-y-2">
+        <%= render "devise/shared/links" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,291 @@
+<%# Form Helper Components for EcommerceStore %>
+
+<%#
+  Usage Examples:
+
+  Primary Button:
+  <%= render 'shared/button', text: 'Submit', type: 'primary', classes: 'w-full' %>
+
+  Form Input:
+  <%= render 'shared/form_input', name: 'email', label: 'Email Address', type: 'email', required: true %>
+
+  Form Select:
+  <%= render 'shared/form_select', name: 'category', label: 'Category', options: [['Option 1', 1], ['Option 2', 2]] %>
+%>
+
+<%# Button Component %>
+<%#
+  @param text [String] Button text
+  @param type [String] Button type: 'primary', 'secondary', 'success', 'danger', 'outline-primary'
+  @param size [String] Button size: 'sm', 'lg', or nil for default
+  @param classes [String] Additional CSS classes
+  @param link [String] URL if this should be a link instead of button
+  @param method [String] HTTP method for links
+  @param onclick [String] JavaScript onclick handler
+%>
+<% content_for :button_component do %>
+  <%
+    button_classes = "inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+
+    case type
+    when 'primary'
+      button_classes += " bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm hover:shadow-md"
+    when 'secondary'
+      button_classes += " bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500"
+    when 'success'
+      button_classes += " bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+    when 'danger'
+      button_classes += " bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+    when 'outline-primary'
+      button_classes += " border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:ring-indigo-500"
+    else
+      button_classes += " bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500"
+    end
+
+    if size == 'lg'
+      button_classes += " px-6 py-3 text-base"
+    elsif size == 'sm'
+      button_classes += " px-3 py-1.5 text-xs"
+    end
+
+    button_classes += " #{classes}" if classes.present?
+  %>
+
+  <% if link.present? %>
+    <%= link_to text, link, class: button_classes, method: method, onclick: onclick %>
+  <% else %>
+    <button type="submit" class="<%= button_classes %>" onclick="<%= onclick %>">
+      <%= text %>
+    </button>
+  <% end %>
+<% end %>
+
+<%# Form Input Component %>
+<%#
+  @param name [String] Input name attribute
+  @param label [String] Input label
+  @param type [String] Input type (text, email, password, etc.)
+  @param value [String] Input value
+  @param placeholder [String] Input placeholder
+  @param required [Boolean] Whether field is required
+  @param error [String] Error message to display
+  @param help [String] Help text to display
+  @param classes [String] Additional CSS classes
+%>
+<% content_for :form_input_component do %>
+  <div class="mb-4">
+    <% if label.present? %>
+      <label for="<%= name %>" class="block text-sm font-medium text-gray-700 mb-1">
+        <%= label %>
+        <% if required %>
+          <span class="text-red-500">*</span>
+        <% end %>
+      </label>
+    <% end %>
+
+    <input
+      type="<%= type || 'text' %>"
+      name="<%= name %>"
+      id="<%= name %>"
+      value="<%= value %>"
+      placeholder="<%= placeholder %>"
+      <% if required %>required<% end %>
+      class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors <%= error.present? ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : '' %> <%= classes %>"
+    >
+
+    <% if error.present? %>
+      <p class="text-red-600 text-sm mt-1"><%= error %></p>
+    <% end %>
+
+    <% if help.present? %>
+      <p class="text-gray-500 text-sm mt-1"><%= help %></p>
+    <% end %>
+  </div>
+<% end %>
+
+<%# Form Select Component %>
+<%#
+  @param name [String] Select name attribute
+  @param label [String] Select label
+  @param options [Array] Array of [text, value] pairs
+  @param selected [String] Selected value
+  @param required [Boolean] Whether field is required
+  @param error [String] Error message to display
+  @param prompt [String] Prompt text for first option
+  @param classes [String] Additional CSS classes
+%>
+<% content_for :form_select_component do %>
+  <div class="mb-4">
+    <% if label.present? %>
+      <label for="<%= name %>" class="block text-sm font-medium text-gray-700 mb-1">
+        <%= label %>
+        <% if required %>
+          <span class="text-red-500">*</span>
+        <% end %>
+      </label>
+    <% end %>
+
+    <select
+      name="<%= name %>"
+      id="<%= name %>"
+      <% if required %>required<% end %>
+      class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white <%= error.present? ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : '' %> <%= classes %>"
+    >
+      <% if prompt.present? %>
+        <option value=""><%= prompt %></option>
+      <% end %>
+
+      <% options.each do |option| %>
+        <option value="<%= option[1] %>" <%= 'selected' if selected == option[1].to_s %>>
+          <%= option[0] %>
+        </option>
+      <% end %>
+    </select>
+
+    <% if error.present? %>
+      <p class="text-red-600 text-sm mt-1"><%= error %></p>
+    <% end %>
+  </div>
+<% end %>
+
+<%# Card Component %>
+<%#
+  @param header [String] Card header text
+  @param classes [String] Additional CSS classes
+  @param body_classes [String] Additional CSS classes for card body
+%>
+<% content_for :card_component do %>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden <%= classes %>">
+    <% if header.present? %>
+      <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <h3 class="text-lg font-medium text-gray-900"><%= header %></h3>
+      </div>
+    <% end %>
+
+    <div class="px-6 py-4 <%= body_classes %>">
+      <%= yield %>
+    </div>
+  </div>
+<% end %>
+
+<%# Badge Component %>
+<%#
+  @param text [String] Badge text
+  @param type [String] Badge type: 'primary', 'success', 'warning', 'danger', 'gray'
+  @param classes [String] Additional CSS classes
+%>
+<% content_for :badge_component do %>
+  <%
+    badge_classes = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+
+    case type
+    when 'primary'
+      badge_classes += " bg-indigo-100 text-indigo-800"
+    when 'success'
+      badge_classes += " bg-green-100 text-green-800"
+    when 'warning'
+      badge_classes += " bg-yellow-100 text-yellow-800"
+    when 'danger'
+      badge_classes += " bg-red-100 text-red-800"
+    when 'gray'
+      badge_classes += " bg-gray-100 text-gray-800"
+    else
+      badge_classes += " bg-gray-100 text-gray-800"
+    end
+
+    badge_classes += " #{classes}" if classes.present?
+  %>
+
+  <span class="<%= badge_classes %>">
+    <%= text %>
+  </span>
+<% end %>
+
+<%# Loading Spinner Component %>
+<%#
+  @param size [String] Spinner size: 'sm', 'lg', or nil for default
+  @param classes [String] Additional CSS classes
+%>
+<% content_for :spinner_component do %>
+  <%
+    spinner_classes = "animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"
+
+    case size
+    when 'sm'
+      spinner_classes += " w-4 h-4"
+    when 'lg'
+      spinner_classes += " w-8 h-8"
+    else
+      spinner_classes += " w-6 h-6"
+    end
+
+    spinner_classes += " #{classes}" if classes.present?
+  %>
+
+  <div class="<%= spinner_classes %>"></div>
+<% end %>
+
+<%# Alert Component %>
+<%#
+  @param message [String] Alert message
+  @param type [String] Alert type: 'success', 'error', 'warning', 'info'
+  @param dismissible [Boolean] Whether alert can be dismissed
+  @param classes [String] Additional CSS classes
+%>
+<% content_for :alert_component do %>
+  <%
+    alert_classes = "p-4 mb-4 border-l-4"
+    icon_classes = "h-5 w-5"
+
+    case type
+    when 'success'
+      alert_classes += " bg-green-50 border-green-400"
+      icon_classes += " text-green-400"
+      text_classes = "text-green-700"
+      icon_path = "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+    when 'error'
+      alert_classes += " bg-red-50 border-red-400"
+      icon_classes += " text-red-400"
+      text_classes = "text-red-700"
+      icon_path = "M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+    when 'warning'
+      alert_classes += " bg-yellow-50 border-yellow-400"
+      icon_classes += " text-yellow-400"
+      text_classes = "text-yellow-700"
+      icon_path = "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+    else
+      alert_classes += " bg-blue-50 border-blue-400"
+      icon_classes += " text-blue-400"
+      text_classes = "text-blue-700"
+      icon_path = "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+    end
+
+    alert_classes += " #{classes}" if classes.present?
+  %>
+
+  <div class="<%= alert_classes %>" role="alert">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="<%= icon_classes %>" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="<%= icon_path %>" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm <%= text_classes %> font-medium">
+          <%= message %>
+        </p>
+      </div>
+      <% if dismissible %>
+        <div class="ml-auto pl-3">
+          <div class="-mx-1.5 -my-1.5">
+            <button type="button" class="inline-flex rounded-md p-1.5 <%= text_classes.gsub('text-', 'text-').gsub('-700', '-500') %> hover:bg-opacity-20 focus:outline-none" onclick="this.parentElement.parentElement.parentElement.parentElement.remove()">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

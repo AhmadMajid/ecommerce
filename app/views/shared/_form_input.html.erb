@@ -1,0 +1,47 @@
+<%# Form Input Component
+  Usage: <%= render 'shared/form_input', name: 'email', label: 'Email Address', type: 'email', required: true %>
+
+  Parameters:
+  - name: Input name attribute (required)
+  - label: Input label
+  - type: Input type (text, email, password, etc.) - default: 'text'
+  - value: Input value
+  - placeholder: Input placeholder
+  - required: Boolean - whether field is required
+  - error: Error message to display
+  - help: Help text to display
+  - classes: Additional CSS classes
+  - autofocus: Boolean - whether to autofocus
+  - autocomplete: Autocomplete attribute value
+%>
+
+<div class="mb-4">
+  <% if local_assigns[:label].present? %>
+    <label for="<%= local_assigns[:name] %>" class="block text-sm font-medium text-gray-700 mb-1">
+      <%= local_assigns[:label] %>
+      <% if local_assigns[:required] %>
+        <span class="text-red-500">*</span>
+      <% end %>
+    </label>
+  <% end %>
+
+  <input
+    type="<%= local_assigns[:type] || 'text' %>"
+    name="<%= local_assigns[:name] %>"
+    id="<%= local_assigns[:name] %>"
+    value="<%= local_assigns[:value] %>"
+    placeholder="<%= local_assigns[:placeholder] %>"
+    <% if local_assigns[:required] %>required<% end %>
+    <% if local_assigns[:autofocus] %>autofocus<% end %>
+    <% if local_assigns[:autocomplete] %>autocomplete="<%= local_assigns[:autocomplete] %>"<% end %>
+    class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors <%= local_assigns[:error].present? ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : '' %> <%= local_assigns[:classes] %>"
+  >
+
+  <% if local_assigns[:error].present? %>
+    <p class="text-red-600 text-sm mt-1"><%= local_assigns[:error] %></p>
+  <% end %>
+
+  <% if local_assigns[:help].present? %>
+    <p class="text-gray-500 text-sm mt-1"><%= local_assigns[:help] %></p>
+  <% end %>
+</div>

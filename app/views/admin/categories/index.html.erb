@@ -1,0 +1,267 @@
+<% content_for(:title, "Categories") %>
+
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Categories</h1>
+    <p class="text-gray-600">Manage your product categories and hierarchy</p>
+  </div>
+
+  <div class="mt-4 sm:mt-0 flex space-x-2">
+    <%= render 'shared/button',
+        text: 'Import Categories',
+        type: 'outline-secondary',
+        link: '#',
+        data: { action: 'click->admin--bulk#showImportModal' } %>
+
+    <%= render 'shared/button',
+        text: 'New Category',
+        type: 'primary',
+        link: new_admin_category_path %>
+  </div>
+</div>
+
+<!-- Filters and Search -->
+<%= render 'shared/card' do %>
+  <%= form_with url: admin_categories_path, method: :get, local: true,
+      class: "grid grid-cols-1 md:grid-cols-4 gap-4" do |form| %>
+
+    <%= render 'shared/form_group', label: 'Search' do %>
+      <%= form.text_field :search,
+          value: params[:search],
+          placeholder: "Search categories...",
+          class: "form-input" %>
+    <% end %>
+
+    <%= render 'shared/form_group', label: 'Parent Category' do %>
+      <%= form.select :parent_id,
+          options_from_collection_for_select(@parent_categories, :id, :name, params[:parent_id]),
+          { prompt: 'All Categories' },
+          { class: "form-select" } %>
+    <% end %>
+
+    <%= render 'shared/form_group', label: 'Status' do %>
+      <%= form.select :status,
+          options_for_select([
+            ['All', ''],
+            ['Active', 'active'],
+            ['Inactive', 'inactive']
+          ], params[:status]),
+          {},
+          { class: "form-select" } %>
+    <% end %>
+
+    <div class="flex items-end space-x-2">
+      <%= render 'shared/button', text: 'Filter', type: 'primary', submit: true %>
+      <%= link_to 'Clear', admin_categories_path,
+          class: "btn btn-outline-secondary" %>
+    </div>
+  <% end %>
+<% end %>
+
+<!-- Bulk Actions -->
+<% if @categories.any? %>
+  <div class="mb-4" data-admin--bulk-target="actionsBar" style="display: none;">
+    <%= render 'shared/card' do %>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-600">
+            <span data-admin--bulk-target="selectedCount">0</span> categories selected
+          </span>
+        </div>
+
+        <div class="flex space-x-2">
+          <%= render 'shared/button',
+              text: 'Activate Selected',
+              type: 'outline-success',
+              data: { action: 'click->admin--bulk#activateSelected' } %>
+
+          <%= render 'shared/button',
+              text: 'Deactivate Selected',
+              type: 'outline-secondary',
+              data: { action: 'click->admin--bulk#deactivateSelected' } %>
+
+          <%= render 'shared/button',
+              text: 'Delete Selected',
+              type: 'outline-danger',
+              data: {
+                action: 'click->admin--bulk#deleteSelected',
+                confirm: 'Are you sure? This action cannot be undone.'
+              } %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<!-- Categories Table -->
+<%= render 'shared/card' do %>
+  <% if @categories.any? %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <input type="checkbox"
+                     class="form-checkbox"
+                     data-action="change->admin--bulk#toggleAll"
+                     data-admin--bulk-target="selectAll">
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Category
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Parent
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Products
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Updated
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @categories.each do |category| %>
+            <tr class="hover:bg-gray-50" data-admin--bulk-target="row">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="checkbox"
+                       class="form-checkbox"
+                       value="<%= category.id %>"
+                       data-action="change->admin--bulk#toggleRow"
+                       data-admin--bulk-target="rowCheckbox">
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <% if category.image.attached? %>
+                    <%= image_tag category.image,
+                        class: "w-10 h-10 rounded object-cover mr-3",
+                        alt: category.name %>
+                  <% else %>
+                    <div class="w-10 h-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                      </svg>
+                    </div>
+                  <% end %>
+
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">
+                      <%= category.name %>
+                      <% if category.featured? %>
+                        <%= render 'shared/badge', text: 'Featured', type: 'primary', size: 'small' %>
+                      <% end %>
+                    </div>
+                    <% if category.description.present? %>
+                      <div class="text-sm text-gray-500">
+                        <%= truncate(category.description, length: 50) %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <% if category.parent %>
+                  <span class="text-blue-600 hover:text-blue-800">
+                    <%= link_to category.parent.name, admin_category_path(category.parent) %>
+                  </span>
+                <% else %>
+                  <span class="text-gray-400">Root Category</span>
+                <% end %>
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div class="flex items-center space-x-2">
+                  <span><%= category.products_count %></span>
+                  <% if category.total_products_count > category.products_count %>
+                    <span class="text-gray-500">
+                      (+<%= category.total_products_count - category.products_count %> in subcategories)
+                    </span>
+                  <% end %>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap">
+                <%= render 'shared/badge',
+                    text: category.active? ? 'Active' : 'Inactive',
+                    type: category.active? ? 'success' : 'gray' %>
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= time_ago_in_words(category.updated_at) %> ago
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end space-x-2">
+                  <%= link_to admin_category_path(category),
+                      class: "text-blue-600 hover:text-blue-900",
+                      title: "View Category" do %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                  <% end %>
+
+                  <%= link_to edit_admin_category_path(category),
+                      class: "text-indigo-600 hover:text-indigo-900",
+                      title: "Edit Category" do %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  <% end %>
+
+                  <%= link_to admin_category_path(category),
+                      method: :delete,
+                      class: "text-red-600 hover:text-red-900",
+                      title: "Delete Category",
+                      data: {
+                        confirm: "Are you sure? This will also delete all subcategories and reassign products."
+                      } do %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if respond_to?(:paginate) %>
+      <div class="mt-6 flex justify-center">
+        <%= paginate @categories, theme: 'twitter_bootstrap_4' %>
+      </div>
+    <% end %>
+
+  <% else %>
+    <div class="text-center py-12">
+      <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No categories found</h3>
+      <p class="text-gray-500 mb-4">
+        <% if params[:search].present? || params[:parent_id].present? || params[:status].present? %>
+          Try adjusting your filters or search terms.
+        <% else %>
+          Get started by creating your first category.
+        <% end %>
+      </p>
+      <% unless params[:search].present? || params[:parent_id].present? || params[:status].present? %>
+        <%= render 'shared/button',
+            text: 'Create Category',
+            type: 'primary',
+            link: new_admin_category_path %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

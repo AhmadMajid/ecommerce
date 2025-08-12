@@ -1,0 +1,379 @@
+<% content_for(:title, @product.persisted? ? "Edit Product" : "New Product") %>
+
+<div class="mb-6">
+  <div class="flex items-center space-x-2 text-sm text-gray-500 mb-2">
+    <%= link_to "Products", admin_products_path, class: "hover:text-gray-700" %>
+    <span>/</span>
+    <span class="text-gray-900">
+      <%= @product.persisted? ? "Edit #{@product.name}" : "New Product" %>
+    </span>
+  </div>
+
+  <h1 class="text-2xl font-bold text-gray-900">
+    <%= @product.persisted? ? "Edit Product" : "Create New Product" %>
+  </h1>
+</div>
+
+<%= form_with model: [:admin, @product], local: true, multipart: true,
+    class: "space-y-6" do |form| %>
+
+  <% if @product.errors.any? %>
+    <%= render 'shared/alert',
+        type: 'error',
+        title: "Please fix the following errors:",
+        message: @product.errors.full_messages.join(', ') %>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Basic Information -->
+      <%= render 'shared/card', header: 'Basic Information' do %>
+        <div class="space-y-4">
+          <%= render 'shared/form_group', label: 'Product Name', required: true do %>
+            <%= form.text_field :name,
+                class: "form-input #{'border-red-300' if @product.errors[:name].any?}",
+                placeholder: "Enter product name" %>
+            <% if @product.errors[:name].any? %>
+              <p class="text-red-600 text-sm mt-1"><%= @product.errors[:name].first %></p>
+            <% end %>
+          <% end %>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <%= render 'shared/form_group', label: 'SKU' do %>
+              <%= form.text_field :sku,
+                  class: "form-input #{'border-red-300' if @product.errors[:sku].any?}",
+                  placeholder: "Product SKU" %>
+              <% if @product.errors[:sku].any? %>
+                <p class="text-red-600 text-sm mt-1"><%= @product.errors[:sku].first %></p>
+              <% end %>
+            <% end %>
+
+            <%= render 'shared/form_group', label: 'Slug' do %>
+              <%= form.text_field :slug,
+                  class: "form-input #{'border-red-300' if @product.errors[:slug].any?}",
+                  placeholder: "Auto-generated from name" %>
+              <% if @product.errors[:slug].any? %>
+                <p class="text-red-600 text-sm mt-1"><%= @product.errors[:slug].first %></p>
+              <% end %>
+              <p class="text-gray-500 text-sm mt-1">Leave blank to auto-generate</p>
+            <% end %>
+          </div>
+
+          <%= render 'shared/form_group', label: 'Short Description' do %>
+            <%= form.text_area :short_description,
+                rows: 3,
+                class: "form-textarea",
+                placeholder: "Brief product description (appears in listings)" %>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Full Description' do %>
+            <%= form.text_area :description,
+                rows: 6,
+                class: "form-textarea",
+                placeholder: "Detailed product description" %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Pricing -->
+      <%= render 'shared/card', header: 'Pricing' do %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <%= render 'shared/form_group', label: 'Price', required: true do %>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+              <%= form.number_field :price,
+                  step: 0.01,
+                  class: "form-input pl-8 #{'border-red-300' if @product.errors[:price].any?}",
+                  placeholder: "0.00" %>
+            </div>
+            <% if @product.errors[:price].any? %>
+              <p class="text-red-600 text-sm mt-1"><%= @product.errors[:price].first %></p>
+            <% end %>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Compare at Price' do %>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+              <%= form.number_field :compare_at_price,
+                  step: 0.01,
+                  class: "form-input pl-8",
+                  placeholder: "0.00" %>
+            </div>
+            <p class="text-gray-500 text-sm mt-1">Original price for sale pricing</p>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Cost per Item' do %>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+              <%= form.number_field :cost_price,
+                  step: 0.01,
+                  class: "form-input pl-8",
+                  placeholder: "0.00" %>
+            </div>
+            <p class="text-gray-500 text-sm mt-1">Cost basis for profit calculations</p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Inventory -->
+      <%= render 'shared/card', header: 'Inventory' do %>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            <%= form.check_box :track_inventory,
+                class: "form-checkbox",
+                data: { action: 'change->product-form#toggleInventoryTracking' } %>
+            <%= form.label :track_inventory, "Track inventory for this product",
+                class: "ml-2 text-sm font-medium text-gray-700" %>
+          </div>
+
+          <div id="inventory-fields" class="<%= 'hidden' unless @product.track_inventory? %>">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <%= render 'shared/form_group', label: 'Quantity' do %>
+                <%= form.number_field :inventory_quantity,
+                    class: "form-input",
+                    placeholder: "0" %>
+              <% end %>
+
+              <%= render 'shared/form_group', label: 'Low Stock Threshold' do %>
+                <%= form.number_field :low_stock_threshold,
+                    class: "form-input",
+                    placeholder: "10" %>
+                <p class="text-gray-500 text-sm mt-1">Alert when stock falls below this number</p>
+              <% end %>
+            </div>
+
+            <div class="flex items-center">
+              <%= form.check_box :allow_out_of_stock_purchases,
+                  class: "form-checkbox" %>
+              <%= form.label :allow_out_of_stock_purchases,
+                  "Allow purchases when out of stock",
+                  class: "ml-2 text-sm font-medium text-gray-700" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Physical Properties -->
+      <%= render 'shared/card', header: 'Physical Properties' do %>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <%= render 'shared/form_group', label: 'Weight (lbs)' do %>
+            <%= form.number_field :weight,
+                step: 0.01,
+                class: "form-input",
+                placeholder: "0.00" %>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Length (in)' do %>
+            <%= form.number_field :length,
+                step: 0.01,
+                class: "form-input",
+                placeholder: "0.00" %>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Width (in)' do %>
+            <%= form.number_field :width,
+                step: 0.01,
+                class: "form-input",
+                placeholder: "0.00" %>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Height (in)' do %>
+            <%= form.number_field :height,
+                step: 0.01,
+                class: "form-input",
+                placeholder: "0.00" %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- SEO Settings -->
+      <%= render 'shared/card', header: 'SEO Settings' do %>
+        <%= render 'shared/form_group', label: 'Meta Title' do %>
+          <%= form.text_field :meta_title,
+              class: "form-input",
+              placeholder: "SEO title for this product" %>
+          <p class="text-gray-500 text-sm mt-1">Recommended: 50-60 characters</p>
+        <% end %>
+
+        <%= render 'shared/form_group', label: 'Meta Description' do %>
+          <%= form.text_area :meta_description,
+              rows: 3,
+              class: "form-textarea",
+              placeholder: "SEO description for this product" %>
+          <p class="text-gray-500 text-sm mt-1">Recommended: 150-160 characters</p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Status & Visibility -->
+      <%= render 'shared/card', header: 'Status & Visibility' do %>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            <%= form.check_box :active,
+                class: "form-checkbox" %>
+            <%= form.label :active, "Active", class: "ml-2 text-sm font-medium text-gray-700" %>
+          </div>
+
+          <div class="flex items-center">
+            <%= form.check_box :featured,
+                class: "form-checkbox" %>
+            <%= form.label :featured, "Featured Product", class: "ml-2 text-sm font-medium text-gray-700" %>
+          </div>
+
+          <%= render 'shared/form_group', label: 'Category', required: true do %>
+            <%= form.select :category_id,
+                options_from_collection_for_select(@categories, :id, :name, @product.category_id),
+                { prompt: 'Select a category' },
+                { class: "form-select #{'border-red-300' if @product.errors[:category_id].any?}" } %>
+            <% if @product.errors[:category_id].any? %>
+              <p class="text-red-600 text-sm mt-1"><%= @product.errors[:category_id].first %></p>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Product Images -->
+      <%= render 'shared/card', header: 'Product Images' do %>
+        <% if @product.images.any? %>
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <% @product.images.each_with_index do |image, index| %>
+              <div class="relative group">
+                <%= image_tag image,
+                    class: "w-full h-24 object-cover rounded #{index == 0 ? 'ring-2 ring-blue-500' : ''}",
+                    alt: @product.name %>
+                <% if index == 0 %>
+                  <span class="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                    Primary
+                  </span>
+                <% end %>
+                <button type="button"
+                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        data-action="click->product-form#removeImage"
+                        data-image-id="<%= image.id %>">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%= render 'shared/form_group', label: 'Upload Images' do %>
+          <%= form.file_field :images,
+              multiple: true,
+              class: "form-file",
+              accept: "image/*" %>
+          <p class="text-gray-500 text-sm mt-1">
+            Upload multiple images. First image will be the primary image.
+          </p>
+        <% end %>
+      <% end %>
+
+      <!-- Organization -->
+      <%= render 'shared/card', header: 'Organization' do %>
+        <%= render 'shared/form_group', label: 'Tags' do %>
+          <%= form.text_field :tags,
+              class: "form-input",
+              placeholder: "tag1, tag2, tag3",
+              value: @product.tag_list.join(', ') %>
+          <p class="text-gray-500 text-sm mt-1">Separate tags with commas</p>
+        <% end %>
+
+        <%= render 'shared/form_group', label: 'Sort Order' do %>
+          <%= form.number_field :sort_order,
+              class: "form-input",
+              value: @product.sort_order || 0 %>
+          <p class="text-gray-500 text-sm mt-1">Lower numbers appear first</p>
+        <% end %>
+      <% end %>
+
+      <!-- Action Buttons -->
+      <%= render 'shared/card' do %>
+        <div class="space-y-3">
+          <%= render 'shared/button',
+              text: @product.persisted? ? 'Update Product' : 'Create Product',
+              type: 'primary',
+              submit: true,
+              classes: 'w-full justify-center' %>
+
+          <%= render 'shared/button',
+              text: 'Save as Draft',
+              type: 'secondary',
+              submit: true,
+              classes: 'w-full justify-center',
+              name: 'save_as_draft' %>
+
+          <%= render 'shared/button',
+              text: 'Cancel',
+              type: 'outline-secondary',
+              link: admin_products_path,
+              classes: 'w-full justify-center' %>
+
+          <% if @product.persisted? %>
+            <%= link_to duplicate_admin_product_path(@product),
+                method: :post,
+                class: "btn btn-outline-primary w-full justify-center" do %>
+              Duplicate Product
+            <% end %>
+
+            <%= link_to admin_product_path(@product),
+                method: :delete,
+                class: "btn btn-outline-danger w-full justify-center",
+                data: {
+                  confirm: "Are you sure? This will permanently delete this product."
+                } do %>
+              Delete Product
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- JavaScript for form interactions -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate slug from name
+    const nameField = document.getElementById('product_name');
+    const slugField = document.getElementById('product_slug');
+
+    if (nameField && slugField) {
+      nameField.addEventListener('input', function() {
+        if (!slugField.value || slugField.dataset.autoGenerated !== 'false') {
+          const slug = this.value
+            .toLowerCase()
+            .replace(/[^a-z0-9 -]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+
+          slugField.value = slug;
+          slugField.dataset.autoGenerated = 'true';
+        }
+      });
+
+      slugField.addEventListener('input', function() {
+        this.dataset.autoGenerated = 'false';
+      });
+    }
+
+    // Toggle inventory tracking fields
+    const trackInventoryCheckbox = document.getElementById('product_track_inventory');
+    const inventoryFields = document.getElementById('inventory-fields');
+
+    if (trackInventoryCheckbox && inventoryFields) {
+      trackInventoryCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          inventoryFields.classList.remove('hidden');
+        } else {
+          inventoryFields.classList.add('hidden');
+        }
+      });
+    }
+  });
+</script>

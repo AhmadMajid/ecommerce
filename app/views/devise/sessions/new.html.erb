@@ -1,0 +1,71 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Sign in to your account
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Or
+        <%= link_to "create a new account", new_user_registration_path,
+            class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+      </p>
+    </div>
+
+    <%= form_with model: resource, as: resource_name, url: session_path(resource_name),
+                  local: true, class: "mt-8 space-y-6" do |f| %>
+
+      <div class="rounded-md shadow-sm space-y-4">
+        <!-- Email -->
+        <div>
+          <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+          <%= f.email_field :email,
+              class: "mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm",
+              placeholder: "Email address",
+              required: true,
+              autofocus: true %>
+          <% if resource.errors[:email].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:email].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field :password,
+              class: "mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm",
+              placeholder: "Password",
+              required: true %>
+          <% if resource.errors[:password].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password].first %></p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Remember Me and Forgot Password -->
+      <div class="flex items-center justify-between">
+        <% if devise_mapping.rememberable? %>
+          <div class="flex items-center">
+            <%= f.check_box :remember_me, class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+            <%= f.label :remember_me, "Remember me", class: "ml-2 block text-sm text-gray-900" %>
+          </div>
+        <% end %>
+
+        <div class="text-sm">
+          <%= link_to "Forgot your password?", new_user_password_path,
+              class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <%= f.submit "Sign In",
+            class: "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors" %>
+      </div>
+
+      <!-- Additional Links -->
+      <div class="text-center space-y-2">
+        <%= render "devise/shared/links" %>
+      </div>
+    <% end %>
+  </div>
+</div>

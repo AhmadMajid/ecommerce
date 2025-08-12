@@ -1,0 +1,182 @@
+<% content_for(:title, "Products") %>
+<% content_for(:description, "Browse our wide selection of high-quality products") %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+      <% if @current_category %>
+        <%= @current_category.name %>
+      <% else %>
+        All Products
+      <% end %>
+    </h1>
+
+    <% if @current_category&.description.present? %>
+      <p class="text-gray-600"><%= @current_category.description %></p>
+    <% end %>
+
+    <!-- Breadcrumb -->
+    <nav class="mt-4">
+      <ol class="flex items-center space-x-2 text-sm text-gray-500">
+        <li><%= link_to "Home", root_path, class: "hover:text-gray-700" %></li>
+        <li><span class="mx-2">/</span></li>
+        <% if @current_category %>
+          <% @current_category.breadcrumbs.each_with_index do |category, index| %>
+            <% if index == @current_category.breadcrumbs.length - 1 %>
+              <li class="text-gray-900 font-medium"><%= category.name %></li>
+            <% else %>
+              <li>
+                <%= link_to category.name, category_path(category), class: "hover:text-gray-700" %>
+                <span class="mx-2">/</span>
+              </li>
+            <% end %>
+          <% end %>
+        <% else %>
+          <li class="text-gray-900 font-medium">Products</li>
+        <% end %>
+      </ol>
+    </nav>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Sidebar Filters -->
+    <div class="w-full lg:w-64 flex-shrink-0">
+      <div class="bg-white rounded-lg shadow-sm p-6"
+           data-controller="product-filters"
+           data-product-filters-url-value="<%= @current_category ? category_path(@current_category) : products_path %>"
+           data-product-filters-auto-submit-value="true">
+
+        <!-- Loading indicator -->
+        <div class="hidden mb-4" data-product-filters-target="loading">
+          <div class="flex items-center text-indigo-600">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Updating results...
+          </div>
+        </div>
+
+        <!-- Search -->
+        <%= form_with url: @current_category ? category_path(@current_category) : products_path,
+            method: :get,
+            local: true,
+            data: {
+              product_filters_target: "form",
+              action: "submit->product-filters#submit"
+            },
+            class: "space-y-6" do |form| %>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+            <%= form.text_field :search,
+                value: params[:search],
+                placeholder: "Search products...",
+                class: "form-input w-full",
+                data: { action: "input->product-filters#inputChanged" } %>
+          </div>
+
+          <!-- Category Filter (only show if not in category view) -->
+          <% unless @current_category %>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <%= form.select :category_id,
+                  options_from_collection_for_select(@categories.roots, :id, :name, params[:category_id]),
+                  { prompt: 'All Categories' },
+                  {
+                    class: "form-select w-full",
+                    data: { action: "change->product-filters#selectChanged" }
+                  } %>
+            </div>
+          <% end %>
+
+          <!-- Price Range -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+            <div class="flex items-center space-x-2">
+              <%= form.number_field :min_price,
+                  value: params[:min_price],
+                  placeholder: "Min",
+                  step: 0.01,
+                  class: "form-input w-full",
+                  data: { action: "input->product-filters#inputChanged" } %>
+              <span class="text-gray-500">to</span>
+              <%= form.number_field :max_price,
+                  value: params[:max_price],
+                  placeholder: "Max",
+                  step: 0.01,
+                  class: "form-input w-full",
+                  data: { action: "input->product-filters#inputChanged" } %>
+            </div>
+          </div>
+
+          <!-- Filter Button -->
+          <div class="flex space-x-2">
+            <%= form.submit "Filter", class: "btn btn-primary flex-1" %>
+            <button type="button"
+                    class="btn btn-outline-secondary hidden"
+                    data-product-filters-target="clearButton"
+                    data-action="click->product-filters#clearFilters">
+              Clear
+            </button>
+          </div>
+
+          <!-- Preserve current sort -->
+          <%= form.hidden_field :sort, value: params[:sort] %>
+
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1">
+      <!-- Toolbar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 bg-white rounded-lg shadow-sm p-4">
+        <!-- Results Count -->
+        <div class="mb-4 sm:mb-0">
+          <p class="text-sm text-gray-600">
+            Showing <%= @products.offset_value + 1 %>-<%= [@products.offset_value + @products.limit_value, @products.total_count].min %>
+            of <%= @products.total_count %> products
+          </p>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="flex items-center space-x-4">
+          <label class="text-sm font-medium text-gray-700">Sort by:</label>
+          <%= form_with url: @current_category ? category_path(@current_category) : products_path,
+              method: :get,
+              local: true,
+              data: { remote: true },
+              class: "inline" do |form| %>
+            <%= form.select :sort,
+                options_for_select([
+                  ['Default', ''],
+                  ['Price: Low to High', 'price_low'],
+                  ['Price: High to Low', 'price_high'],
+                  ['Name A-Z', 'name'],
+                  ['Newest First', 'newest'],
+                  ['Featured', 'featured']
+                ], params[:sort]),
+                {},
+                {
+                  class: "form-select",
+                  onchange: "this.form.submit()"
+                } %>
+
+            <!-- Preserve current filters -->
+            <%= form.hidden_field :search, value: params[:search] %>
+            <%= form.hidden_field :category_id, value: params[:category_id] %>
+            <%= form.hidden_field :min_price, value: params[:min_price] %>
+            <%= form.hidden_field :max_price, value: params[:max_price] %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="products-container" data-product-filters-target="results">
+        <%= render 'products_grid', products: @products %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,98 @@
+<div class="product-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300">
+  <%= link_to product_path(product), class: "block" do %>
+    <!-- Product Image -->
+    <div class="relative">
+      <% if product.primary_image %>
+        <%= image_tag product.primary_image,
+            class: "w-full h-64 object-cover",
+            alt: product.name %>
+      <% else %>
+        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+          <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+      <% end %>
+
+      <!-- Badges -->
+      <div class="absolute top-2 left-2 flex flex-col gap-1">
+        <% if product.featured? %>
+          <span class="badge badge-primary text-xs">Featured</span>
+        <% end %>
+
+        <% if product.compare_at_price && product.compare_at_price > product.price %>
+          <% discount_percent = ((product.compare_at_price - product.price) / product.compare_at_price * 100).round %>
+          <span class="badge badge-danger text-xs">-<%= discount_percent %>%</span>
+        <% end %>
+      </div>
+
+      <!-- Stock Status -->
+      <% if product.track_inventory? && product.stock_status == 'out_of_stock' %>
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+            Out of Stock
+          </span>
+        </div>
+      <% elsif product.track_inventory? && product.stock_status == 'low_stock' %>
+        <div class="absolute top-2 right-2">
+          <span class="bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
+            Low Stock
+          </span>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Product Info -->
+    <div class="p-4">
+      <!-- Category -->
+      <p class="text-sm text-gray-500 mb-1"><%= product.category.name %></p>
+
+      <!-- Product Name -->
+      <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">
+        <%= product.name %>
+      </h3>
+
+      <!-- Short Description -->
+      <% if product.short_description.present? %>
+        <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+          <%= product.short_description %>
+        </p>
+      <% end %>
+
+      <!-- Price -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="price-current text-lg font-bold text-gray-900">
+            $<%= product.price %>
+          </span>
+
+          <% if product.compare_at_price && product.compare_at_price > product.price %>
+            <span class="price-original text-sm">
+              $<%= product.compare_at_price %>
+            </span>
+          <% end %>
+        </div>
+
+        <!-- Quick Add to Cart (if not out of stock) -->
+        <% unless product.track_inventory? && product.stock_status == 'out_of_stock' %>
+          <button class="btn btn-sm btn-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                  onclick="event.preventDefault(); event.stopPropagation(); addToCart(<%= product.id %>)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
+            </svg>
+          </button>
+        <% end %>
+      </div>
+
+      <!-- Rating (placeholder for future implementation) -->
+      <div class="rating-stars mt-2">
+        <% 5.times do |i| %>
+          <svg class="rating-star-empty w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+          </svg>
+        <% end %>
+        <span class="text-xs text-gray-500 ml-1">(0)</span>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,224 @@
+<% content_for :title, "Shopping Cart" %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+
+  <% if @cart.empty? %>
+    <!-- Empty Cart State -->
+    <div class="text-center py-16">
+      <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"></path>
+      </svg>
+      <h2 class="mt-6 text-xl font-medium text-gray-900">Your cart is empty</h2>
+      <p class="mt-2 text-gray-500">Start shopping to add items to your cart.</p>
+      <div class="mt-6">
+        <%= link_to "Continue Shopping", products_path, class: "btn btn-primary" %>
+      </div>
+    </div>
+  <% else %>
+    <div class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start xl:gap-x-16">
+      <!-- Cart Items -->
+      <div class="lg:col-span-7">
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Cart Items (<%= @cart.item_count %>)</h2>
+          </div>
+
+          <ul class="divide-y divide-gray-200">
+            <% @cart_items.each do |item| %>
+              <li class="px-6 py-4" data-cart-item-id="<%= item.id %>">
+                <div class="flex items-start space-x-4">
+                  <!-- Product Image -->
+                  <div class="flex-shrink-0 w-20 h-20">
+                    <% if item.product.images.attached? %>
+                      <%= image_tag item.product.images.first,
+                          class: "w-full h-full object-cover rounded-md",
+                          alt: item.product.name %>
+                    <% else %>
+                      <div class="w-full h-full bg-gray-200 rounded-md flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                        </svg>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <!-- Product Details -->
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-medium text-gray-900">
+                      <%= link_to item.product.name, product_path(item.product),
+                          class: "hover:text-blue-600" %>
+                    </h3>
+
+                    <% if item.product.sku.present? %>
+                      <p class="text-sm text-gray-500">SKU: <%= item.product.sku %></p>
+                    <% end %>
+
+                    <div class="mt-2 flex items-center justify-between">
+                      <!-- Quantity Controls -->
+                      <div class="flex items-center space-x-2">
+                        <label class="sr-only">Quantity</label>
+                        <button type="button"
+                                data-action="click->cart#decreaseQuantity"
+                                data-cart-item-id="<%= item.id %>"
+                                class="w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                          </svg>
+                        </button>
+
+                        <input type="number"
+                               value="<%= item.quantity %>"
+                               min="1"
+                               max="999"
+                               data-action="change->cart#updateQuantity"
+                               data-cart-item-id="<%= item.id %>"
+                               class="w-16 text-center border border-gray-300 rounded-md py-1 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                        <button type="button"
+                                data-action="click->cart#increaseQuantity"
+                                data-cart-item-id="<%= item.id %>"
+                                class="w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                          </svg>
+                        </button>
+                      </div>
+
+                      <!-- Remove Button -->
+                      <button type="button"
+                              data-action="click->cart#removeItem"
+                              data-cart-item-id="<%= item.id %>"
+                              class="text-sm text-red-600 hover:text-red-800 font-medium">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Price -->
+                  <div class="text-right">
+                    <p class="text-sm text-gray-500">
+                      <%= number_to_currency(item.price) %> each
+                    </p>
+                    <p class="text-lg font-medium text-gray-900" data-item-total="<%= item.id %>">
+                      <%= number_to_currency(item.total_price) %>
+                    </p>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+
+        <!-- Suggested Products -->
+        <% if @suggested_products.any? %>
+          <div class="mt-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">You might also like</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <% @suggested_products.each do |product| %>
+                <div class="bg-white rounded-lg shadow p-4">
+                  <%= link_to product_path(product), class: "block" do %>
+                    <% if product.images.attached? %>
+                      <%= image_tag product.images.first,
+                          class: "w-full h-32 object-cover rounded-md mb-2",
+                          alt: product.name %>
+                    <% end %>
+                    <h3 class="text-sm font-medium text-gray-900 truncate"><%= product.name %></h3>
+                    <p class="text-sm text-gray-500"><%= number_to_currency(product.price) %></p>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="lg:col-span-5 lg:mt-0 mt-8">
+        <div class="bg-white shadow rounded-lg sticky top-8">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Order Summary</h2>
+          </div>
+
+          <div class="px-6 py-4 space-y-4">
+            <!-- Coupon Code -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Coupon Code</label>
+              <%= form_with url: cart_path, method: :patch, local: false,
+                  data: { action: "submit->cart#applyCoupon" },
+                  class: "flex space-x-2" do |f| %>
+                <%= f.text_field :coupon_code,
+                    value: @cart.coupon_code,
+                    placeholder: "Enter coupon code",
+                    class: "flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+                <%= f.submit "Apply",
+                    class: "px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500" %>
+              <% end %>
+
+              <% if @cart.coupon_code.present? %>
+                <div class="mt-2 flex items-center justify-between">
+                  <span class="text-sm text-green-600">✓ Coupon "<%= @cart.coupon_code %>" applied</span>
+                  <%= link_to "Remove", cart_path(remove_coupon: true),
+                      method: :patch,
+                      class: "text-sm text-red-600 hover:text-red-800" %>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Summary Details -->
+            <div class="space-y-2 border-t border-gray-200 pt-4" id="cart-summary">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Subtotal (<span data-item-count><%= @cart.item_count %></span> items)</span>
+                <span data-subtotal><%= number_to_currency(@cart.subtotal) %></span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Shipping</span>
+                <span data-shipping>
+                  <% if @cart.shipping_amount > 0 %>
+                    <%= number_to_currency(@cart.shipping_amount) %>
+                  <% else %>
+                    Free
+                  <% end %>
+                </span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Tax</span>
+                <span data-tax><%= number_to_currency(@cart.tax_amount) %></span>
+              </div>
+
+              <% if @cart.discount_amount > 0 %>
+                <div class="flex justify-between text-sm text-green-600">
+                  <span>Discount</span>
+                  <span data-discount>-<%= number_to_currency(@cart.discount_amount) %></span>
+                </div>
+              <% end %>
+
+              <div class="flex justify-between text-base font-medium text-gray-900 border-t border-gray-200 pt-2">
+                <span>Total</span>
+                <span data-total><%= number_to_currency(@cart.total) %></span>
+              </div>
+            </div>
+
+            <!-- Checkout Button -->
+            <div class="mt-6">
+              <%= link_to new_checkout_path, class: "w-full btn btn-primary text-center block" do %>
+                Proceed to Checkout
+              <% end %>
+            </div>
+
+            <!-- Continue Shopping -->
+            <div class="mt-4 text-center">
+              <%= link_to "Continue Shopping", products_path,
+                  class: "text-blue-600 hover:text-blue-800 text-sm font-medium" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<!-- Cart JavaScript Controller -->
+<div data-controller="cart"></div>

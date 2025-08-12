@@ -1,0 +1,232 @@
+<% content_for :title, "Checkout - Review Order" %>
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Checkout Progress Indicator -->
+  <div class="mb-8">
+    <div class="flex items-center justify-center">
+      <div class="flex items-center space-x-4">
+        <!-- Shipping Step -->
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <span class="ml-2 text-sm font-medium text-green-600">Shipping</span>
+        </div>
+
+        <!-- Arrow -->
+        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+
+        <!-- Payment Step -->
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <span class="ml-2 text-sm font-medium text-green-600">Payment</span>
+        </div>
+
+        <!-- Arrow -->
+        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+
+        <!-- Review Step -->
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full">
+            <span class="text-sm font-medium">3</span>
+          </div>
+          <span class="ml-2 text-sm font-medium text-indigo-600">Review</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Review Content -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Order Items -->
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-medium text-gray-900">Order Items</h2>
+        </div>
+        <div class="px-6 py-4">
+          <div class="space-y-4">
+            <% current_cart.items.includes(:product).each do |item| %>
+              <div class="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0">
+                <div class="flex-shrink-0">
+                  <% if item.product.images.attached? %>
+                    <%= image_tag item.product.images.first,
+                        alt: item.product.name,
+                        class: "h-20 w-20 object-cover rounded-md" %>
+                  <% else %>
+                    <div class="h-20 w-20 bg-gray-200 rounded-md flex items-center justify-center">
+                      <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <p class="text-base font-medium text-gray-900 truncate">
+                    <%= item.product.name %>
+                  </p>
+                  <p class="text-sm text-gray-500 mt-1">
+                    <%= item.product.description.truncate(100) if item.product.description %>
+                  </p>
+                  <div class="flex items-center mt-2 space-x-4">
+                    <span class="text-sm text-gray-500">Qty: <%= item.quantity %></span>
+                    <span class="text-sm text-gray-500">Price: $<%= number_with_precision(item.product.price, precision: 2) %></span>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <p class="text-base font-medium text-gray-900">
+                    $<%= number_with_precision(item.total_price, precision: 2) %>
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Information -->
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-gray-900">Shipping Information</h2>
+          <%= link_to "Edit", shipping_checkout_index_path,
+              class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+        </div>
+        <div class="px-6 py-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Shipping Address -->
+            <div>
+              <h3 class="text-sm font-medium text-gray-900 mb-2">Delivery Address</h3>
+              <div class="text-sm text-gray-600">
+                <p><%= @checkout.shipping_address_data['first_name'] %> <%= @checkout.shipping_address_data['last_name'] %></p>
+                <% if @checkout.shipping_address_data['company'].present? %>
+                  <p><%= @checkout.shipping_address_data['company'] %></p>
+                <% end %>
+                <p><%= @checkout.shipping_address_data['address_line_1'] %></p>
+                <% if @checkout.shipping_address_data['address_line_2'].present? %>
+                  <p><%= @checkout.shipping_address_data['address_line_2'] %></p>
+                <% end %>
+                <p><%= @checkout.shipping_address_data['city'] %>, <%= @checkout.shipping_address_data['state_province'] %> <%= @checkout.shipping_address_data['postal_code'] %></p>
+                <p><%= @checkout.shipping_address_data['country'] %></p>
+                <% if @checkout.shipping_address_data['phone'].present? %>
+                  <p class="mt-2">Phone: <%= @checkout.shipping_address_data['phone'] %></p>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Shipping Method -->
+            <div>
+              <h3 class="text-sm font-medium text-gray-900 mb-2">Shipping Method</h3>
+              <% if @checkout.shipping_method %>
+                <div class="text-sm text-gray-600">
+                  <p class="font-medium"><%= @checkout.shipping_method.name %></p>
+                  <p><%= @checkout.shipping_method.description %></p>
+                  <p class="mt-1">Delivery: <%= @checkout.shipping_method.delivery_estimate %></p>
+                  <p class="mt-2 text-base font-medium text-gray-900">
+                    <% shipping_cost = @checkout.shipping_method.calculate_cost(current_cart.total_price) %>
+                    <% if shipping_cost > 0 %>
+                      $<%= number_with_precision(shipping_cost, precision: 2) %>
+                    <% else %>
+                      Free
+                    <% end %>
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-gray-900">Payment Information</h2>
+          <%= link_to "Edit", payment_checkout_index_path,
+              class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+        </div>
+        <div class="px-6 py-4">
+          <div class="flex items-center">
+            <% if @checkout.payment_method == 'paypal' %>
+              <svg class="w-8 h-8 mr-3" viewBox="0 0 24 24" fill="#003087">
+                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a.45.45 0 0 0-.077-.437c-.708-1.267-2.716-1.81-5.69-1.81h-7.46a.548.548 0 0 0-.535.382L4.944.901a.641.641 0 0 0 .633.74h4.606a.548.548 0 0 1 .535.382l1.12 7.106c.082.518.526.9 1.05.9h2.19c4.298 0 7.664-1.747 8.647-6.797.03-.149.054-.294.077-.437z"/>
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-gray-900">PayPal</p>
+                <p class="text-sm text-gray-500">Pay with your PayPal account</p>
+              </div>
+            <% else %>
+              <svg class="w-8 h-8 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Credit Card</p>
+                <p class="text-sm text-gray-500">Ending in ••••</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms and Complete Order -->
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-6">
+          <%= form_with url: complete_checkout_index_path, method: :post, local: true do |form| %>
+            <!-- Terms and Conditions -->
+            <div class="mb-6">
+              <label class="flex items-start">
+                <input type="checkbox"
+                       required
+                       class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-0.5">
+                <span class="ml-3 text-sm text-gray-600">
+                  I agree to the
+                  <%= link_to "Terms and Conditions", "#", class: "text-indigo-600 hover:text-indigo-500 underline" %>
+                  and
+                  <%= link_to "Privacy Policy", "#", class: "text-indigo-600 hover:text-indigo-500 underline" %>
+                </span>
+              </label>
+            </div>
+
+            <!-- Demo Notice -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+              <div class="flex">
+                <svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <div>
+                  <h4 class="text-sm font-medium text-yellow-800">Demo Mode</h4>
+                  <p class="text-sm text-yellow-700">This is a demo checkout. No real payments will be processed and no orders will be fulfilled.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-between">
+              <%= link_to "← Back to Payment", payment_checkout_index_path,
+                  class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+
+              <%= form.submit "Complete Order",
+                  class: "inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <div class="lg:col-span-1">
+      <%= render 'shared/checkout_order_summary', cart: current_cart, checkout: @checkout %>
+    </div>
+  </div>
+</div>

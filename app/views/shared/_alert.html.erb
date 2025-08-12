@@ -1,0 +1,66 @@
+<%# Alert Component
+  Usage: <%= render 'shared/alert', message: 'Success!', type: 'success', dismissible: true %>
+
+  Parameters:
+  - message: Alert message (required)
+  - type: 'success', 'error', 'warning', 'info' (default: 'info')
+  - dismissible: Boolean - whether alert can be dismissed
+  - classes: Additional CSS classes
+%>
+
+<%
+  alert_type = local_assigns[:type] || 'info'
+  alert_classes = "p-4 mb-4 border-l-4"
+  icon_classes = "h-5 w-5"
+
+  case alert_type
+  when 'success'
+    alert_classes += " bg-green-50 border-green-400"
+    icon_classes += " text-green-400"
+    text_classes = "text-green-700"
+    icon_path = "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+  when 'error'
+    alert_classes += " bg-red-50 border-red-400"
+    icon_classes += " text-red-400"
+    text_classes = "text-red-700"
+    icon_path = "M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+  when 'warning'
+    alert_classes += " bg-yellow-50 border-yellow-400"
+    icon_classes += " text-yellow-400"
+    text_classes = "text-yellow-700"
+    icon_path = "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+  else
+    alert_classes += " bg-blue-50 border-blue-400"
+    icon_classes += " text-blue-400"
+    text_classes = "text-blue-700"
+    icon_path = "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+  end
+
+  alert_classes += " #{local_assigns[:classes]}" if local_assigns[:classes].present?
+%>
+
+<div class="<%= alert_classes %>" role="alert">
+  <div class="flex">
+    <div class="flex-shrink-0">
+      <svg class="<%= icon_classes %>" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="<%= icon_path %>" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <div class="ml-3">
+      <p class="text-sm <%= text_classes %> font-medium">
+        <%= local_assigns[:message] %>
+      </p>
+    </div>
+    <% if local_assigns[:dismissible] %>
+      <div class="ml-auto pl-3">
+        <div class="-mx-1.5 -my-1.5">
+          <button type="button" class="inline-flex rounded-md p-1.5 <%= text_classes.gsub('-700', '-500') %> hover:bg-opacity-20 focus:outline-none" onclick="this.parentElement.parentElement.parentElement.parentElement.remove()">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

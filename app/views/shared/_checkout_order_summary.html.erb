@@ -1,0 +1,116 @@
+<div class="bg-white shadow-sm rounded-lg">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h3 class="text-lg font-medium text-gray-900">Order Summary</h3>
+  </div>
+
+  <div class="px-6 py-4">
+    <!-- Cart Items -->
+    <div class="space-y-4 mb-6">
+      <% cart.items.includes(:product).each do |item| %>
+        <div class="flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            <% if item.product.images.attached? %>
+              <%= image_tag item.product.images.first,
+                  alt: item.product.name,
+                  class: "h-16 w-16 object-cover rounded-md" %>
+            <% else %>
+              <div class="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
+                <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate">
+              <%= item.product.name %>
+            </p>
+            <p class="text-sm text-gray-500">
+              Qty: <%= item.quantity %>
+            </p>
+          </div>
+
+          <div class="text-sm font-medium text-gray-900">
+            $<%= number_with_precision(item.total_price, precision: 2) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Order Totals -->
+    <div class="border-t border-gray-200 pt-4 space-y-3">
+      <!-- Subtotal -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">Subtotal</span>
+        <span class="text-sm font-medium text-gray-900">
+          $<%= number_with_precision(cart.subtotal, precision: 2) %>
+        </span>
+      </div>
+
+      <!-- Tax -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">Tax</span>
+        <span class="text-sm font-medium text-gray-900">
+          $<%= number_with_precision(cart.tax_amount, precision: 2) %>
+        </span>
+      </div>
+
+      <!-- Shipping -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">Shipping</span>
+        <span class="text-sm font-medium text-gray-900">
+          <% if checkout&.shipping_method %>
+            <% shipping_cost = checkout.shipping_method.calculate_cost(cart.total_price) %>
+            <% if shipping_cost > 0 %>
+              $<%= number_with_precision(shipping_cost, precision: 2) %>
+            <% else %>
+              Free
+            <% end %>
+          <% else %>
+            <span class="text-gray-400">TBD</span>
+          <% end %>
+        </span>
+      </div>
+
+      <!-- Total -->
+      <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+        <span class="text-base font-medium text-gray-900">Total</span>
+        <span class="text-base font-medium text-gray-900">
+          <% if checkout&.shipping_method %>
+            <% shipping_cost = checkout.shipping_method.calculate_cost(cart.total_price) %>
+            $<%= number_with_precision(cart.total_price + shipping_cost, precision: 2) %>
+          <% else %>
+            $<%= number_with_precision(cart.total_price, precision: 2) %>
+          <% end %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Estimated Delivery -->
+    <% if checkout&.shipping_method %>
+      <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+        <h4 class="text-sm font-medium text-gray-900">Estimated Delivery</h4>
+        <p class="text-sm text-gray-600 mt-1">
+          <%= checkout.shipping_method.delivery_estimate %>
+        </p>
+        <p class="text-xs text-gray-500 mt-1">
+          via <%= checkout.shipping_method.name %>
+        </p>
+      </div>
+    <% end %>
+
+    <!-- Security Notice -->
+    <div class="mt-6 p-4 bg-green-50 rounded-lg">
+      <div class="flex items-center">
+        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+        <span class="ml-2 text-sm font-medium text-green-800">Secure Checkout</span>
+      </div>
+      <p class="text-xs text-green-600 mt-1">
+        Your payment information is encrypted and secure.
+      </p>
+    </div>
+  </div>
+</div>

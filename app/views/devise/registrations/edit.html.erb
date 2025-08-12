@@ -1,0 +1,144 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl w-full space-y-8">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Edit Profile
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Update your account information
+      </p>
+    </div>
+
+    <%= form_with model: resource, as: resource_name, url: registration_path(resource_name),
+                  method: :put, local: true, class: "mt-8 space-y-6" do |f| %>
+
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- First Name -->
+          <div>
+            <%= f.label :first_name, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.text_field :first_name,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            <% if resource.errors[:first_name].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:first_name].first %></p>
+            <% end %>
+          </div>
+
+          <!-- Last Name -->
+          <div>
+            <%= f.label :last_name, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.text_field :last_name,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            <% if resource.errors[:last_name].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:last_name].first %></p>
+            <% end %>
+          </div>
+
+          <!-- Email -->
+          <div class="md:col-span-2">
+            <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.email_field :email,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            <% if resource.errors[:email].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:email].first %></p>
+            <% end %>
+            <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+              <p class="mt-1 text-sm text-amber-600">
+                Currently waiting confirmation for: <%= resource.unconfirmed_email %>
+              </p>
+            <% end %>
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <%= f.label :phone, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.telephone_field :phone,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            <% if resource.errors[:phone].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:phone].first %></p>
+            <% end %>
+          </div>
+
+          <!-- Date of Birth -->
+          <div>
+            <%= f.label :date_of_birth, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.date_field :date_of_birth,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            <% if resource.errors[:date_of_birth].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:date_of_birth].first %></p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Password Section -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+        <p class="text-sm text-gray-600 mb-4">Leave blank if you don't want to change your password</p>
+
+        <div class="space-y-4">
+          <!-- New Password -->
+          <div>
+            <%= f.label :password, "New password", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.password_field :password,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
+                autocomplete: "new-password" %>
+            <% if resource.errors[:password].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password].first %></p>
+            <% else %>
+              <p class="mt-1 text-sm text-gray-500">
+                <%= @minimum_password_length %> characters minimum
+              </p>
+            <% end %>
+          </div>
+
+          <!-- Password Confirmation -->
+          <div>
+            <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.password_field :password_confirmation,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
+                autocomplete: "new-password" %>
+            <% if resource.errors[:password_confirmation].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password_confirmation].first %></p>
+            <% end %>
+          </div>
+
+          <!-- Current Password -->
+          <div>
+            <%= f.label :current_password, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.password_field :current_password,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
+                autocomplete: "current-password" %>
+            <p class="mt-1 text-sm text-gray-500">Required to confirm changes</p>
+            <% if resource.errors[:current_password].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= resource.errors[:current_password].first %></p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between space-x-4">
+        <%= f.submit "Update Profile",
+            class: "flex-1 bg-indigo-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors" %>
+
+        <%= link_to "Back", :back,
+            class: "flex-1 bg-gray-100 text-gray-700 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center" %>
+      </div>
+
+      <!-- Account Deletion -->
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <h3 class="text-lg font-medium text-red-900 mb-2">Delete Account</h3>
+        <p class="text-sm text-red-700 mb-4">
+          Unhappy with our service? You can delete your account, but please note this action is irreversible.
+        </p>
+        <%= button_to "Delete my account", registration_path(resource_name),
+            method: :delete,
+            data: {
+              confirm: "Are you sure you want to delete your account? This action cannot be undone."
+            },
+            class: "bg-red-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" %>
+      </div>
+    <% end %>
+  </div>
+</div>

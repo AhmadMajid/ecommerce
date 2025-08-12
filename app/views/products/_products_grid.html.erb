@@ -1,0 +1,121 @@
+<% if products.any? %>
+  <div class="product-grid mb-8">
+    <% products.each do |product| %>
+      <%= render 'shared/product_card', product: product %>
+    <% end %>
+  </div>
+
+  <!-- Pagination -->
+  <% if products.respond_to?(:total_pages) && products.total_pages > 1 %>
+    <div class="flex justify-center">
+      <nav class="flex items-center space-x-1">
+        <!-- Previous Page -->
+        <% if products.prev_page %>
+          <%= link_to products_path(params.except(:action, :controller).merge(page: products.prev_page)),
+              class: "px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors",
+              data: { remote: true } do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          <% end %>
+        <% else %>
+          <span class="px-3 py-2 text-gray-300 cursor-not-allowed">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </span>
+        <% end %>
+
+        <!-- Page Numbers -->
+        <% page_range = [1, [products.current_page - 2, 1].max].max..[products.total_pages, [products.current_page + 2, products.total_pages].min].min %>
+
+        <% if page_range.first > 1 %>
+          <%= link_to products_path(params.except(:action, :controller).merge(page: 1)),
+              class: "px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors",
+              data: { remote: true } do %>
+            1
+          <% end %>
+          <% if page_range.first > 2 %>
+            <span class="px-3 py-2 text-gray-500">...</span>
+          <% end %>
+        <% end %>
+
+        <% page_range.each do |page| %>
+          <% if page == products.current_page %>
+            <span class="px-3 py-2 bg-indigo-600 text-white rounded-md">
+              <%= page %>
+            </span>
+          <% else %>
+            <%= link_to products_path(params.except(:action, :controller).merge(page: page)),
+                class: "px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors",
+                data: { remote: true } do %>
+              <%= page %>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <% if page_range.last < products.total_pages %>
+          <% if page_range.last < products.total_pages - 1 %>
+            <span class="px-3 py-2 text-gray-500">...</span>
+          <% end %>
+          <%= link_to products_path(params.except(:action, :controller).merge(page: products.total_pages)),
+              class: "px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors",
+              data: { remote: true } do %>
+            <%= products.total_pages %>
+          <% end %>
+        <% end %>
+
+        <!-- Next Page -->
+        <% if products.next_page %>
+          <%= link_to products_path(params.except(:action, :controller).merge(page: products.next_page)),
+              class: "px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors",
+              data: { remote: true } do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          <% end %>
+        <% else %>
+          <span class="px-3 py-2 text-gray-300 cursor-not-allowed">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </span>
+        <% end %>
+      </nav>
+    </div>
+  <% end %>
+
+<% else %>
+  <!-- Empty State -->
+  <div class="text-center py-16">
+    <svg class="w-24 h-24 text-gray-300 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+    </svg>
+
+    <h3 class="text-xl font-medium text-gray-900 mb-2">No products found</h3>
+
+    <% if params[:search].present? || params[:category_id].present? || params[:min_price].present? || params[:max_price].present? %>
+      <p class="text-gray-600 mb-6">
+        Try adjusting your search criteria or browse our categories.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <%= link_to "Clear Filters",
+            @current_category ? category_path(@current_category) : products_path,
+            class: "btn btn-outline-primary" %>
+
+        <%= link_to "Browse Categories",
+            categories_path,
+            class: "btn btn-primary" %>
+      </div>
+    <% else %>
+      <p class="text-gray-600 mb-6">
+        We're working hard to add new products. Check back soon!
+      </p>
+
+      <%= link_to "Browse Categories",
+          categories_path,
+          class: "btn btn-primary" %>
+    <% end %>
+  </div>
+<% end %>

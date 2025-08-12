@@ -1,0 +1,31 @@
+<%# Loading Spinner Component
+  Usage: <%= render 'shared/spinner', size: 'lg' %>
+
+  Parameters:
+  - size: 'sm', 'lg', or nil for default
+  - classes: Additional CSS classes
+  - text: Loading text to display next to spinner
+%>
+
+<%
+  spinner_size = local_assigns[:size]
+  spinner_classes = "animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"
+
+  case spinner_size
+  when 'sm'
+    spinner_classes += " w-4 h-4"
+  when 'lg'
+    spinner_classes += " w-8 h-8"
+  else
+    spinner_classes += " w-6 h-6"
+  end
+
+  spinner_classes += " #{local_assigns[:classes]}" if local_assigns[:classes].present?
+%>
+
+<div class="flex items-center justify-center">
+  <div class="<%= spinner_classes %>"></div>
+  <% if local_assigns[:text].present? %>
+    <span class="ml-2 text-gray-600"><%= local_assigns[:text] %></span>
+  <% end %>
+</div>

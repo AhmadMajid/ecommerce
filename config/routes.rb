@@ -1,0 +1,107 @@
+Rails.application.routes.draw do
+  # Devise routes for user authentication
+  devise_for :users, controllers: {
+    registrations: 'users/registrations',
+    sessions: 'users/sessions',
+    passwords: 'users/passwords',
+    confirmations: 'users/confirmations',
+    unlocks: 'users/unlocks'
+  }
+
+  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  # Root route
+  root "home#index"
+
+  # Customer-facing routes
+  resources :products, only: [:index, :show], param: :slug do
+    collection do
+      get :search
+    end
+  end
+
+  resources :categories, only: [:index, :show], param: :slug
+
+  # Cart functionality
+  resource :cart, only: [:show, :update, :destroy] do
+    post :merge
+    get :mini
+  end
+
+  resources :cart_items, only: [:create, :update, :destroy] do
+    collection do
+      delete :clear
+    end
+  end
+
+  # Checkout routes
+  resources :checkout, only: [:new, :destroy] do
+    collection do
+      get :shipping
+      patch :update_shipping
+      get :payment
+      patch :update_payment
+      get :review
+      post :complete
+    end
+  end
+
+  # Public pages
+  get "about", to: "pages#about"
+  get "contact", to: "pages#contact"
+  post "contact", to: "pages#create_contact"
+
+  # User account routes
+  resources :users, only: [:show, :edit, :update] do
+    member do
+      get :profile
+    end
+  end
+
+  # Address management
+  resources :addresses do
+    member do
+      patch :set_default
+    end
+  end
+
+  # Admin routes
+  namespace :admin do
+    root 'dashboard#index'
+
+    resources :categories do
+      member do
+        patch :toggle_active
+        patch :toggle_featured
+      end
+
+      collection do
+        patch :bulk_update
+        delete :bulk_destroy
+      end
+    end
+
+    resources :products do
+      member do
+        patch :toggle_active
+        patch :toggle_featured
+        post :duplicate
+        patch :update_inventory
+      end
+
+      collection do
+        patch :bulk_update
+        delete :bulk_destroy
+        get :export
+      end
+    end
+  end
+
+  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
+  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
+  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+end

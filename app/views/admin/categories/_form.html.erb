@@ -1,0 +1,194 @@
+<% content_for(:title, @category.persisted? ? "Edit Category" : "New Category") %>
+
+<div class="mb-6">
+  <div class="flex items-center space-x-2 text-sm text-gray-500 mb-2">
+    <%= link_to "Categories", admin_categories_path, class: "hover:text-gray-700" %>
+    <span>/</span>
+    <span class="text-gray-900">
+      <%= @category.persisted? ? "Edit #{@category.name}" : "New Category" %>
+    </span>
+  </div>
+
+  <h1 class="text-2xl font-bold text-gray-900">
+    <%= @category.persisted? ? "Edit Category" : "Create New Category" %>
+  </h1>
+</div>
+
+<%= form_with model: [:admin, @category], local: true, multipart: true,
+    class: "space-y-6" do |form| %>
+
+  <% if @category.errors.any? %>
+    <%= render 'shared/alert',
+        type: 'error',
+        title: "Please fix the following errors:",
+        message: @category.errors.full_messages.join(', ') %>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Information -->
+    <div class="lg:col-span-2 space-y-6">
+      <%= render 'shared/card', header: 'Basic Information' do %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <%= render 'shared/form_group', label: 'Category Name', required: true do %>
+            <%= form.text_field :name,
+                class: "form-input #{'border-red-300' if @category.errors[:name].any?}",
+                placeholder: "e.g., Electronics, Clothing" %>
+            <% if @category.errors[:name].any? %>
+              <p class="text-red-600 text-sm mt-1"><%= @category.errors[:name].first %></p>
+            <% end %>
+          <% end %>
+
+          <%= render 'shared/form_group', label: 'Slug' do %>
+            <%= form.text_field :slug,
+                class: "form-input #{'border-red-300' if @category.errors[:slug].any?}",
+                placeholder: "Auto-generated from name" %>
+            <% if @category.errors[:slug].any? %>
+              <p class="text-red-600 text-sm mt-1"><%= @category.errors[:slug].first %></p>
+            <% end %>
+            <p class="text-gray-500 text-sm mt-1">Leave blank to auto-generate from name</p>
+          <% end %>
+        </div>
+
+        <%= render 'shared/form_group', label: 'Description' do %>
+          <%= form.text_area :description,
+              rows: 4,
+              class: "form-textarea",
+              placeholder: "Describe this category..." %>
+        <% end %>
+
+        <%= render 'shared/form_group', label: 'Parent Category' do %>
+          <%= form.select :parent_id,
+              options_from_collection_for_select(
+                Category.where.not(id: @category.id).roots,
+                :id, :name, @category.parent_id
+              ),
+              { prompt: 'Select parent category (optional)' },
+              { class: "form-select" } %>
+          <p class="text-gray-500 text-sm mt-1">Leave empty to create a root category</p>
+        <% end %>
+      <% end %>
+
+      <!-- SEO Settings -->
+      <%= render 'shared/card', header: 'SEO Settings' do %>
+        <%= render 'shared/form_group', label: 'Meta Title' do %>
+          <%= form.text_field :meta_title,
+              class: "form-input",
+              placeholder: "SEO title for this category" %>
+          <p class="text-gray-500 text-sm mt-1">Recommended: 50-60 characters</p>
+        <% end %>
+
+        <%= render 'shared/form_group', label: 'Meta Description' do %>
+          <%= form.text_area :meta_description,
+              rows: 3,
+              class: "form-textarea",
+              placeholder: "SEO description for this category" %>
+          <p class="text-gray-500 text-sm mt-1">Recommended: 150-160 characters</p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Status & Visibility -->
+      <%= render 'shared/card', header: 'Status & Visibility' do %>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            <%= form.check_box :active,
+                class: "form-checkbox" %>
+            <%= form.label :active, "Active", class: "ml-2 text-sm font-medium text-gray-700" %>
+          </div>
+
+          <div class="flex items-center">
+            <%= form.check_box :featured,
+                class: "form-checkbox" %>
+            <%= form.label :featured, "Featured Category", class: "ml-2 text-sm font-medium text-gray-700" %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Category Image -->
+      <%= render 'shared/card', header: 'Category Image' do %>
+        <% if @category.image.attached? %>
+          <div class="mb-4">
+            <%= image_tag @category.image,
+                class: "w-full h-32 object-cover rounded-lg",
+                alt: @category.name %>
+          </div>
+        <% end %>
+
+        <%= render 'shared/form_group', label: 'Upload Image' do %>
+          <%= form.file_field :image,
+              class: "form-file",
+              accept: "image/*" %>
+          <p class="text-gray-500 text-sm mt-1">Recommended: 600x400px, JPG or PNG</p>
+        <% end %>
+      <% end %>
+
+      <!-- Display Settings -->
+      <%= render 'shared/card', header: 'Display Settings' do %>
+        <%= render 'shared/form_group', label: 'Sort Order' do %>
+          <%= form.number_field :sort_order,
+              class: "form-input",
+              value: @category.sort_order || 0 %>
+          <p class="text-gray-500 text-sm mt-1">Lower numbers appear first</p>
+        <% end %>
+      <% end %>
+
+      <!-- Action Buttons -->
+      <%= render 'shared/card' do %>
+        <div class="space-y-3">
+          <%= render 'shared/button',
+              text: @category.persisted? ? 'Update Category' : 'Create Category',
+              type: 'primary',
+              submit: true,
+              classes: 'w-full justify-center' %>
+
+          <%= render 'shared/button',
+              text: 'Cancel',
+              type: 'outline-secondary',
+              link: admin_categories_path,
+              classes: 'w-full justify-center' %>
+
+          <% if @category.persisted? %>
+            <%= link_to admin_category_path(@category),
+                method: :delete,
+                class: "btn btn-outline-danger w-full justify-center",
+                data: {
+                  confirm: "Are you sure? This will permanently delete this category and all its subcategories."
+                } do %>
+              Delete Category
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- JavaScript for slug generation -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const nameField = document.getElementById('category_name');
+    const slugField = document.getElementById('category_slug');
+
+    if (nameField && slugField) {
+      nameField.addEventListener('input', function() {
+        if (!slugField.value || slugField.dataset.autoGenerated !== 'false') {
+          const slug = this.value
+            .toLowerCase()
+            .replace(/[^a-z0-9 -]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+
+          slugField.value = slug;
+          slugField.dataset.autoGenerated = 'true';
+        }
+      });
+
+      slugField.addEventListener('input', function() {
+        this.dataset.autoGenerated = 'false';
+      });
+    }
+  });
+</script>

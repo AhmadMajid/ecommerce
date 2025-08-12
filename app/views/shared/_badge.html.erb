@@ -1,0 +1,32 @@
+<%# Badge Component
+  Usage: <%= render 'shared/badge', text: 'New', type: 'success' %>
+
+  Parameters:
+  - text: Badge text (required)
+  - type: 'primary', 'success', 'warning', 'danger', 'gray' (default: 'gray')
+  - classes: Additional CSS classes
+%>
+
+<%
+  badge_type = local_assigns[:type] || 'gray'
+  badge_classes = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+
+  case badge_type
+  when 'primary'
+    badge_classes += " bg-indigo-100 text-indigo-800"
+  when 'success'
+    badge_classes += " bg-green-100 text-green-800"
+  when 'warning'
+    badge_classes += " bg-yellow-100 text-yellow-800"
+  when 'danger'
+    badge_classes += " bg-red-100 text-red-800"
+  when 'gray'
+    badge_classes += " bg-gray-100 text-gray-800"
+  end
+
+  badge_classes += " #{local_assigns[:classes]}" if local_assigns[:classes].present?
+%>
+
+<span class="<%= badge_classes %>">
+  <%= local_assigns[:text] %>
+</span>

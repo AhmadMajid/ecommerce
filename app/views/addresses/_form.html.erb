@@ -1,0 +1,166 @@
+<% content_for :title, @address.new_record? ? "Add Address" : "Edit Address" %>
+
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">
+      <%= @address.new_record? ? "Add New Address" : "Edit Address" %>
+    </h1>
+    <p class="mt-2 text-sm text-gray-600">
+      <%= @address.address_type&.humanize %> address information
+    </p>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-6">
+      <%= form_with model: @address, local: true, class: "space-y-6" do |form| %>
+        <!-- Address Type -->
+        <div>
+          <%= form.label :address_type, "Address Type", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :address_type,
+              options_for_select([
+                ['Shipping Address', 'shipping'],
+                ['Billing Address', 'billing']
+              ], @address.address_type),
+              {},
+              { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+          <% if @address.errors[:address_type].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= @address.errors[:address_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Name Fields -->
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+          <div>
+            <%= form.label :first_name, "First Name", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :first_name,
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm #{'border-red-300' if @address.errors[:first_name].any?}",
+                required: true %>
+            <% if @address.errors[:first_name].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= @address.errors[:first_name].first %></p>
+            <% end %>
+          </div>
+
+          <div>
+            <%= form.label :last_name, "Last Name", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :last_name,
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm #{'border-red-300' if @address.errors[:last_name].any?}",
+                required: true %>
+            <% if @address.errors[:last_name].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= @address.errors[:last_name].first %></p>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <%= form.label :company, "Company (Optional)", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :company,
+              class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
+
+        <!-- Address Lines -->
+        <div>
+          <%= form.label :address_line_1, "Address Line 1", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :address_line_1,
+              class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm #{'border-red-300' if @address.errors[:address_line_1].any?}",
+              required: true %>
+          <% if @address.errors[:address_line_1].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= @address.errors[:address_line_1].first %></p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= form.label :address_line_2, "Address Line 2 (Optional)", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :address_line_2,
+              class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
+
+        <!-- City, State, Postal Code -->
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
+          <div class="sm:col-span-1">
+            <%= form.label :city, "City", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :city,
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm #{'border-red-300' if @address.errors[:city].any?}",
+                required: true %>
+            <% if @address.errors[:city].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= @address.errors[:city].first %></p>
+            <% end %>
+          </div>
+
+          <div class="sm:col-span-1">
+            <%= form.label :state_province, "State/Province", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :state_province,
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm #{'border-red-300' if @address.errors[:state_province].any?}",
+                required: true %>
+            <% if @address.errors[:state_province].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= @address.errors[:state_province].first %></p>
+            <% end %>
+          </div>
+
+          <div class="sm:col-span-1">
+            <%= form.label :postal_code, "ZIP/Postal Code", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :postal_code,
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm #{'border-red-300' if @address.errors[:postal_code].any?}",
+                required: true %>
+            <% if @address.errors[:postal_code].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= @address.errors[:postal_code].first %></p>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Country -->
+        <div>
+          <%= form.label :country, "Country", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :country,
+              options_for_select([
+                ['United States', 'United States'],
+                ['Canada', 'Canada'],
+                ['United Kingdom', 'United Kingdom'],
+                ['Australia', 'Australia'],
+                ['Germany', 'Germany'],
+                ['France', 'France'],
+                ['Japan', 'Japan'],
+                ['Brazil', 'Brazil'],
+                ['Mexico', 'Mexico'],
+                ['India', 'India']
+              ], @address.country),
+              {},
+              { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
+                required: true } %>
+          <% if @address.errors[:country].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= @address.errors[:country].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Phone -->
+        <div>
+          <%= form.label :phone, "Phone Number", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.telephone_field :phone,
+              class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+          <% if @address.errors[:phone].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= @address.errors[:phone].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Default Address -->
+        <div class="flex items-center">
+          <%= form.check_box :default_address,
+              class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+          <%= form.label :default_address, "Set as default #{@address.address_type} address",
+              class: "ml-2 block text-sm text-gray-900" %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+          <%= link_to "Cancel", addresses_path,
+              class: "text-sm font-medium text-gray-600 hover:text-gray-500" %>
+
+          <%= form.submit @address.new_record? ? "Add Address" : "Update Address",
+              class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
