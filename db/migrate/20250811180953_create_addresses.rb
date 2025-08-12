@@ -19,7 +19,7 @@ class CreateAddresses < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :addresses, :user_id
+    # Note: user_id index is automatically created by t.references
     add_index :addresses, [:user_id, :address_type]
     add_index :addresses, [:user_id, :default_address]
     add_index :addresses, :active

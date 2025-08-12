@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_181516) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_114226) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -152,6 +152,76 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_181516) do
     t.index ["user_id"], name: "index_checkouts_on_user_id"
   end
 
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.string "product_name", null: false
+    t.string "product_sku", null: false
+    t.string "variant_title"
+    t.string "variant_sku"
+    t.integer "quantity", null: false
+    t.decimal "unit_price", precision: 10, scale: 2, null: false
+    t.decimal "total_price", precision: 10, scale: 2, null: false
+    t.decimal "discount_amount", precision: 10, scale: 2, default: "0.0"
+    t.decimal "tax_amount", precision: 10, scale: 2, default: "0.0"
+    t.decimal "tax_rate", precision: 5, scale: 4, default: "0.0"
+    t.boolean "taxable", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id", "product_id"], name: "index_order_items_on_order_id_and_product_id"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+    t.index ["product_sku"], name: "index_order_items_on_product_sku"
+    t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "order_number", null: false
+    t.string "email", null: false
+    t.decimal "total", precision: 10, scale: 2, null: false
+    t.integer "status", default: 0
+    t.integer "payment_status", default: 0
+    t.integer "fulfillment_status", default: 0
+    t.string "currency", default: "USD"
+    t.decimal "subtotal", precision: 10, scale: 2, default: "0.0"
+    t.decimal "tax_amount", precision: 10, scale: 2, default: "0.0"
+    t.decimal "shipping_amount", precision: 10, scale: 2, default: "0.0"
+    t.decimal "discount_amount", precision: 10, scale: 2, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_orders_on_email"
+    t.index ["order_number"], name: "index_orders_on_order_number", unique: true
+    t.index ["payment_status"], name: "index_orders_on_payment_status"
+    t.index ["status"], name: "index_orders_on_status"
+    t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.string "payment_id", null: false
+    t.string "payment_intent_id"
+    t.string "transaction_id"
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.string "currency", default: "USD"
+    t.integer "status", default: 0
+    t.integer "payment_method", default: 0
+    t.string "gateway", null: false
+    t.string "gateway_transaction_id"
+    t.text "gateway_response"
+    t.boolean "authorized", default: false
+    t.boolean "captured", default: false
+    t.datetime "authorized_at"
+    t.datetime "captured_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gateway"], name: "index_payments_on_gateway"
+    t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["payment_id"], name: "index_payments_on_payment_id", unique: true
+    t.index ["status"], name: "index_payments_on_status"
+  end
+
   create_table "product_variants", force: :cascade do |t|
     t.bigint "product_id", null: false
     t.string "title", null: false
@@ -248,6 +318,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_181516) do
     t.index ["active"], name: "index_shipping_methods_on_active"
   end
 
+  create_table "test_tables", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -293,6 +369,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_181516) do
   add_foreign_key "checkouts", "carts"
   add_foreign_key "checkouts", "shipping_methods"
   add_foreign_key "checkouts", "users"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "product_variants"
+  add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "users"
+  add_foreign_key "payments", "orders"
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
 end

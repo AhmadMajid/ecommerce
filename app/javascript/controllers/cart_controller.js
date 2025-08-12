@@ -1,10 +1,223 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["count", "subtotal", "tax", "shipping", "discount", "total", "itemTotal"]
+  static targets = ["count", "subtotal", "tax", "shipping", "discount", "total", "itemTotal", "dropdown", "items"]
+  static values = {
+    productId: Number,
+    inStock: Boolean,
+    basePrice: Number,
+    stockQuantity: Number
+  }
 
   connect() {
     console.log("Cart controller connected")
+    this.isOpen = false
+    this.addTimeout = null
+    this.element.addEventListener('click', (e) => e.stopPropagation())
+    document.addEventListener('click', this.closeDropdown.bind(this))
+  }
+
+  disconnect() {
+    document.removeEventListener('click', this.closeDropdown.bind(this))
+    if (this.addTimeout) clearTimeout(this.addTimeout)
+  }
+
+  // Quick add to cart for homepage
+  async addToCart(event) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const button = event.currentTarget
+    const productId = button.dataset.productId || this.productIdValue
+
+    if (!productId) {
+      this.showError("Product not found")
+      return
+    }
+
+    // Show loading state
+    const originalContent = button.innerHTML
+    button.innerHTML = `
+      <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    `
+    button.disabled = true
+
+    try {
+      const response = await fetch('/cart_items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          cart_item: {
+            product_id: productId,
+            quantity: 1
+          }
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        this.handleAddSuccess(data, button)
+      } else {
+        this.handleAddError(data.error || 'Failed to add item to cart', button)
+      }
+    } catch (error) {
+      console.error('Cart add error:', error)
+      this.handleAddError('Network error. Please try again.', button)
+    } finally {
+      // Restore button
+      setTimeout(() => {
+        button.innerHTML = originalContent
+        button.disabled = false
+      }, 1000)
+    }
+  }
+
+  handleAddSuccess(data, button) {
+    // Update cart count
+    this.updateCartCount(data.cart_count || data.item_count)
+
+    // Show success animation
+    this.showSuccessAnimation(button)
+
+    // Show success notification
+    this.showNotification('Added to cart!', 'success')
+
+    // Update cart dropdown if open
+    if (this.hasDropdownTarget && this.isOpen) {
+      this.refreshCartDropdown()
+    }
+  }
+
+  handleAddError(error, button) {
+    this.showError(error)
+
+    // Show error animation
+    button.classList.add('animate-pulse', 'bg-red-500')
+    setTimeout(() => {
+      button.classList.remove('animate-pulse', 'bg-red-500')
+    }, 1000)
+  }
+
+  showSuccessAnimation(button) {
+    // Success animation
+    button.classList.add('animate-bounce', 'bg-green-500')
+    setTimeout(() => {
+      button.classList.remove('animate-bounce', 'bg-green-500')
+    }, 1000)
+  }
+
+  updateCartCount(count) {
+    // Update cart count in header
+    const cartCounts = document.querySelectorAll('#cart-count, [data-cart-count]')
+    cartCounts.forEach(el => {
+      el.textContent = count
+      if (count > 0) {
+        el.classList.remove('hidden')
+      } else {
+        el.classList.add('hidden')
+      }
+    })
+  }
+
+  closeDropdown(event) {
+    if (this.hasDropdownTarget && this.isOpen && !this.element.contains(event.target)) {
+      this.isOpen = false
+      this.dropdownTarget.classList.add('hidden')
+    }
+  }
+
+  async refreshCartDropdown() {
+    if (!this.hasDropdownTarget) return
+
+    try {
+      const response = await fetch('/cart.json')
+      const data = await response.json()
+
+      // Update cart items in dropdown
+      if (this.hasItemsTarget) {
+        this.itemsTarget.innerHTML = this.renderCartItems(data.items || [])
+      }
+    } catch (error) {
+      console.error('Failed to refresh cart:', error)
+    }
+  }
+
+  renderCartItems(items) {
+    if (items.length === 0) {
+      return `
+        <div class="p-8 text-center text-gray-500">
+          <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
+          </svg>
+          <p>Your cart is empty</p>
+        </div>
+      `
+    }
+
+    return items.map(item => `
+      <div class="p-4 border-b border-gray-100 flex items-center space-x-3">
+        <div class="flex-shrink-0 w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+          ${item.image_url ?
+            `<img src="${item.image_url}" class="w-full h-full object-cover rounded-lg" alt="${item.name}">` :
+            `<svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+             </svg>`
+          }
+        </div>
+        <div class="flex-1">
+          <h4 class="font-medium text-sm text-gray-900">${this.truncateText(item.name, 30)}</h4>
+          <p class="text-sm text-gray-500">Qty: ${item.quantity} × $${item.price}</p>
+        </div>
+        <button data-action="click->cart#removeItem"
+                data-item-id="${item.id}"
+                class="text-red-400 hover:text-red-600 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+    `).join('')
+  }
+
+  truncateText(text, length) {
+    return text.length > length ? text.substring(0, length) + '...' : text
+  }
+
+  showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div')
+    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg font-medium shadow-lg transform translate-x-full transition-transform duration-300 ${
+      type === 'success' ? 'bg-green-500 text-white' :
+      type === 'error' ? 'bg-red-500 text-white' :
+      'bg-blue-500 text-white'
+    }`
+    notification.textContent = message
+
+    document.body.appendChild(notification)
+
+    // Animate in
+    setTimeout(() => {
+      notification.classList.remove('translate-x-full')
+    }, 100)
+
+    // Remove after delay
+    setTimeout(() => {
+      notification.classList.add('translate-x-full')
+      setTimeout(() => {
+        document.body.removeChild(notification)
+      }, 300)
+    }, 3000)
+  }
+
+  showError(message) {
+    this.showNotification(message, 'error')
   }
 
   // Increase quantity

@@ -6,6 +6,25 @@ class CartsController < ApplicationController
   def show
     @cart_items = @cart.cart_items.includes(:product)
     @suggested_products = Product.featured.active.limit(4) - @cart.products
+
+    respond_to do |format|
+      format.html
+      format.json {
+        render json: {
+          item_count: @cart.item_count,
+          total_price: @cart.total.to_f,
+          items: @cart_items.map do |item|
+            {
+              id: item.id,
+              product_name: item.product.name,
+              quantity: item.quantity,
+              unit_price: item.price.to_f,
+              total_price: item.total_price.to_f
+            }
+          end
+        }
+      }
+    end
   end
 
   # PATCH /cart

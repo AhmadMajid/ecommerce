@@ -68,38 +68,43 @@ class CheckoutController < ApplicationController
     Rails.logger.debug "Checkout status: #{@checkout.status.inspect}, review?: #{@checkout.review?}" if @checkout
 
     unless @checkout.review?
-      Rails.logger.debug "Checkout not in review status, redirecting"
-      return redirect_to review_checkout_index_path, alert: 'Please review your order first.'
+      redirect_to review_checkout_index_path, alert: 'Please review your order first.'
+      return
     end
 
-    ActiveRecord::Base.transaction do
-      # Create the order from the checkout
-      Rails.logger.debug "About to create order from checkout"
-      order = create_order_from_checkout
-      Rails.logger.debug "Order created: #{order.id}"
+    begin
+      ActiveRecord::Base.transaction do
+        # Create the order from the checkout
+        Rails.logger.debug "About to create order from checkout"
+        # Re-enable order creation now that tables exist
+        order = create_order_from_checkout
+        Rails.logger.debug "Order created successfully: #{order.id}"
 
-      # Mark the cart as converted instead of deleting it
-      Rails.logger.debug "About to mark cart as converted: #{@checkout.cart.inspect}"
-      if @checkout.cart.persisted?
-        @checkout.cart.update!(status: 'converted')
+        # Mark the cart as converted instead of deleting it
+        Rails.logger.debug "About to mark cart as converted: #{@checkout.cart.inspect}"
+        if @checkout.cart.persisted?
+          @checkout.cart.update!(status: 'converted')
+          Rails.logger.debug "Cart status updated to: #{@checkout.cart.reload.status}"
+        end
+        session.delete(:cart_id) if session[:cart_id]
+
+        # Mark checkout as completed
+        Rails.logger.debug "Updating checkout status to completed"
+        Rails.logger.debug "Checkout before update: #{@checkout.inspect}"
+        @checkout.update!(
+          status: 'completed',
+          completed_at: Time.current
+        )
+        Rails.logger.debug "Checkout status updated: #{@checkout.reload.status}"
       end
-      session.delete(:cart_id) if session[:cart_id]
-
-      # Mark checkout as completed
-      Rails.logger.debug "Updating checkout status to completed"
-      @checkout.update!(
-        status: 'completed',
-        completed_at: Time.current
-      )
-      Rails.logger.debug "Checkout status updated: #{@checkout.status}"
 
       Rails.logger.debug "Redirecting to root with success message"
       redirect_to root_path, notice: 'Order completed successfully! This was a demo checkout - no real payment was processed.'
+    rescue => e
+      Rails.logger.error "Checkout completion failed: #{e.class}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      redirect_to review_checkout_index_path, alert: 'There was an error completing your order. Please try again.'
     end
-  rescue => e
-    Rails.logger.error "Checkout completion failed: #{e.class}: #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-    redirect_to review_checkout_index_path, alert: 'There was an error completing your order. Please try again.'
   end
 
   def destroy
@@ -215,20 +220,33 @@ class CheckoutController < ApplicationController
     Rails.logger.debug "Cart items: #{@checkout.cart.cart_items.inspect}"
     Rails.logger.debug "Checkout: #{@checkout.inspect}"
 
+    # Ensure cart has items and recalculate totals
+    if @checkout.cart.cart_items.empty?
+      raise "Cannot create order from empty cart"
+    end
+
+    @checkout.cart.recalculate_totals!
+
     # Create an actual order record from the checkout
+    order_total = @checkout.cart.total_price > 0 ? @checkout.cart.total_price : @checkout.cart.subtotal
+
     order_attrs = {
       user: current_user,
       order_number: "ORD-#{Time.current.strftime('%Y%m%d')}-#{SecureRandom.hex(4).upcase}",
       email: current_user&.email || params[:guest_email] || 'test@example.com',
-      total: @checkout.cart.total_price,
+      total: order_total,
       status: 'pending'
     }
 
     Rails.logger.debug "About to create order with attributes: #{order_attrs.inspect}"
 
-    order = Order.create!(order_attrs)
-
-    Rails.logger.debug "Order created: #{order.inspect}"
+    begin
+      order = Order.create!(order_attrs)
+      Rails.logger.debug "Order created: #{order.inspect}"
+    rescue => e
+      Rails.logger.error "Order creation failed: #{e.class}: #{e.message}"
+      raise e
+    end
 
     # Create order items from cart items
     @checkout.cart.cart_items.each do |cart_item|
@@ -236,8 +254,9 @@ class CheckoutController < ApplicationController
       order_item_attrs = {
         product: cart_item.product,
         product_name: cart_item.product_name,
+        product_sku: cart_item.product.sku,
         quantity: cart_item.quantity,
-        price: cart_item.price,
+        unit_price: cart_item.price,
         total_price: cart_item.total_price
       }
       Rails.logger.debug "Order item attributes: #{order_item_attrs.inspect}"

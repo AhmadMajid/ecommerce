@@ -285,6 +285,12 @@ RSpec.describe 'Controllers Bug Detection', type: :request do
     end
 
     it 'completes checkout' do
+      # Ensure cart has items before creating the checkout
+      cart_item # This forces the cart_item to be created
+
+      # Reload the cart to ensure it has the cart items
+      cart.reload
+
       # Create a checkout ready for completion with all required data
       checkout = create(:checkout,
         user: user,

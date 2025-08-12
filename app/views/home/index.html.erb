@@ -1,0 +1,536 @@
+<!-- Hero Section with Gradient Background -->
+<section class="relative overflow-hidden">
+  <!-- Gradient Background -->
+  <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900"></div>
+
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <!-- Text Content -->
+      <div class="text-white">
+        <h1 class="text-5xl lg:text-7xl font-bold leading-tight mb-6">
+          Discover Your
+          <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            Perfect Style
+          </span>
+        </h1>
+
+        <p class="text-xl lg:text-2xl text-purple-100 mb-8 leading-relaxed">
+          Premium fashion and lifestyle products curated just for you.
+          Shop the latest trends with confidence and style.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+          <%= link_to products_path,
+              class: "group inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold text-lg rounded-xl hover:from-yellow-300 hover:to-orange-400 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl" do %>
+            Shop Collection
+            <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          <% end %>
+
+          <%= link_to categories_path,
+              class: "inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold text-lg rounded-xl hover:bg-white hover:text-purple-900 transition-all duration-300" do %>
+            Browse Categories
+          <% end %>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400">10K+</div>
+            <div class="text-purple-200">Happy Customers</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400">500+</div>
+            <div class="text-purple-200">Products</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400">24/7</div>
+            <div class="text-purple-200">Support</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Image/Showcase -->
+      <div class="relative">
+        <div class="relative z-10">
+          <!-- Feature Product Showcase -->
+          <% if @hero_products.any? %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <% @hero_products.first(2).each_with_index do |product, index| %>
+                <div class="group <%= index == 0 ? 'sm:translate-y-8' : '' %>">
+                  <%= link_to product_path(product.slug),
+                      class: "block bg-white rounded-2xl p-6 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-500" do %>
+
+                    <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4">
+                      <% if product.images.any? %>
+                        <%= image_tag product.images.first,
+                            class: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-500",
+                            alt: product.name %>
+                      <% else %>
+                        <div class="w-full h-full flex items-center justify-center">
+                          <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                        </div>
+                      <% end %>
+                    </div>
+
+                    <h3 class="font-bold text-gray-900 mb-2"><%= truncate(product.name, length: 25) %></h3>
+                    <p class="text-gray-600 text-sm mb-3"><%= truncate(product.short_description || product.description, length: 40) %></p>
+
+                    <div class="flex items-center justify-between">
+                      <span class="text-xl font-bold text-purple-600">$<%= product.price %></span>
+                      <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Featured</span>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <!-- Placeholder when no hero products -->
+            <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-2xl p-8 text-center">
+              <div class="w-24 h-24 bg-white bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-white mb-4">Coming Soon</h3>
+              <p class="text-purple-200">Amazing products are on their way!</p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Floating Elements -->
+        <div class="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full opacity-80 animate-pulse"></div>
+        <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-blue-400 rounded-full opacity-60 animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Indicators -->
+<section class="bg-white py-12 border-b">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Quality Guaranteed</h3>
+        <p class="text-sm text-gray-600">Premium materials only</p>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2v0a2 2 0 01-2-2v-4a2 2 0 00-2-2H8z"></path>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Fast Shipping</h3>
+        <p class="text-sm text-gray-600">Free delivery over $50</p>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Secure Payment</h3>
+        <p class="text-sm text-gray-600">Your data is protected</p>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Easy Returns</h3>
+        <p class="text-sm text-gray-600">30-day return policy</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products Section -->
+<% if @featured_products.any? %>
+<section class="py-12 lg:py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="text-center mb-8 lg:mb-16">
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-4">
+        Featured
+        <span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Collection
+        </span>
+      </h2>
+      <p class="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
+        Discover our hand-picked selection of premium products that define modern style and quality.
+      </p>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">>
+      <% @featured_products.each do |product| %>
+        <div class="group relative bg-white rounded-xl lg:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden">
+          <!-- Sale Badge -->
+          <% if product.on_sale? %>
+            <div class="absolute top-3 left-3 lg:top-4 lg:left-4 z-10">
+              <span class="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 lg:px-3 lg:py-1 rounded-full">
+                SAVE <%= product.sale_percentage %>%
+              </span>
+            </div>
+          <% end %>
+
+          <!-- Product Image -->
+          <%= link_to product_path(product.slug), class: "block" do %>
+            <div class="aspect-square bg-gray-100 overflow-hidden rounded-t-xl lg:rounded-t-2xl">
+              <% if product.images.any? %>
+                <%= image_tag product.images.first,
+                    class: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-700",
+                    alt: product.name %>
+              <% else %>
+                <div class="w-full h-full flex items-center justify-center">
+                  <svg class="w-12 h-12 lg:w-16 lg:h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+
+          <!-- Product Info -->
+          <div class="p-4 lg:p-6">
+            <!-- Category -->
+            <span class="text-xs font-medium text-purple-600 uppercase tracking-wider">
+              <%= product.category.name %>
+            </span>
+
+            <!-- Product Name -->
+            <h3 class="font-bold text-gray-900 mt-2 mb-2 text-base lg:text-lg group-hover:text-purple-600 transition-colors">
+              <%= link_to truncate(product.name, length: 40), product_path(product.slug) %>
+            </h3>
+
+            <!-- Description -->
+            <% if product.short_description.present? %>
+              <p class="text-gray-600 text-sm mb-3 lg:mb-4 line-clamp-2 leading-relaxed">
+                <%= truncate(product.short_description, length: 60) %>
+              </p>
+            <% end %>
+
+            <!-- Price and Add to Cart -->
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex flex-col">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xl lg:text-2xl font-bold text-gray-900">$<%= product.price %></span>
+                  <% if product.compare_at_price && product.compare_at_price > product.price %>
+                    <span class="text-sm text-gray-500 line-through">$<%= product.compare_at_price %></span>
+                  <% end %>
+                </div>
+
+                <!-- Stock Status -->
+                <% if product.track_inventory? %>
+                  <% case product.stock_status %>
+                  <% when 'in_stock' %>
+                    <span class="inline-flex items-center text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full mt-1 w-fit">
+                      <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span>
+                      In Stock
+                    </span>
+                  <% when 'low_stock' %>
+                    <span class="inline-flex items-center text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full mt-1 w-fit">
+                      <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1"></span>
+                      Low Stock
+                    </span>
+                  <% when 'out_of_stock' %>
+                    <span class="inline-flex items-center text-xs text-red-700 bg-red-100 px-2 py-1 rounded-full mt-1 w-fit">
+                      <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1"></span>
+                      Out of Stock
+                    </span>
+                  <% end %>
+                <% end %>
+              </div>
+
+              <!-- Quick Add Button -->
+              <% unless product.track_inventory? && product.stock_status == 'out_of_stock' %>
+                <%= form_with url: cart_items_path, method: :post,
+                    data: { controller: "cart", action: "submit->cart#addToCart" },
+                    class: "inline-block" do |form| %>
+                  <%= form.hidden_field :product_id, value: product.id %>
+                  <%= form.hidden_field :quantity, value: 1 %>
+                  <button type="submit"
+                          class="group/btn bg-gradient-to-r from-purple-600 to-blue-600 text-white p-2.5 lg:p-3 rounded-lg lg:rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                          title="Add to Cart">
+                    <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
+                    </svg>
+                  </button>
+                <% end %>
+              <% else %>
+                <span class="text-red-500 text-xs font-medium bg-red-50 px-2 py-1 rounded">Out of Stock</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- View All Button -->
+    <div class="text-center mt-8 lg:mt-12">
+      <%= link_to products_path,
+          class: "inline-flex items-center px-6 lg:px-8 py-3 lg:py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" do %>
+        View All Products
+        <svg class="ml-2 w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+      <% end %>
+    </div>
+  </div>
+</section>
+<% end %>
+
+<!-- Categories Section -->
+<% if @popular_categories.any? %>
+<section class="py-12 lg:py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="text-center mb-8 lg:mb-16">
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-4">
+        Shop by
+        <span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Category
+        </span>
+      </h2>
+      <p class="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
+        Explore our carefully curated categories to find exactly what you're looking for.
+      </p>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <% @popular_categories.each do |category| %>
+        <%= link_to category_path(category.slug),
+            class: "group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-8 hover:from-purple-50 hover:to-blue-50 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-2xl overflow-hidden" do %>
+
+          <!-- Background Pattern -->
+          <div class="absolute inset-0 opacity-5">
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, currentColor 1px, transparent 1px); background-size: 20px 20px;"></div>
+          </div>
+
+          <!-- Category Icon/Image -->
+          <div class="relative z-10 flex flex-col items-center text-center">
+            <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+              <% if category.image.attached? %>
+                <%= image_tag category.image,
+                    class: "w-16 h-16 object-cover rounded-xl",
+                    alt: category.name %>
+              <% else %>
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+              <% end %>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+              <%= category.name %>
+            </h3>
+
+            <% if category.description.present? %>
+              <p class="text-gray-600 mb-6 line-clamp-3">
+                <%= truncate(category.description, length: 100) %>
+              </p>
+            <% end %>
+
+            <div class="inline-flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
+              Explore Collection
+              <svg class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Hover Effect -->
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-600/0 to-blue-600/0 group-hover:from-purple-600/5 group-hover:to-blue-600/5 transition-all duration-500 rounded-3xl"></div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- View All Categories Button -->
+    <div class="text-center mt-12">
+      <%= link_to categories_path,
+          class: "inline-flex items-center px-8 py-4 border-2 border-purple-600 text-purple-600 font-semibold rounded-xl hover:bg-purple-600 hover:text-white transform hover:scale-105 transition-all duration-300" do %>
+        View All Categories
+        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+      <% end %>
+    </div>
+  </div>
+</section>
+<% end %>
+
+<!-- Latest Products Section -->
+<% if @latest_products.any? %>
+<section class="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        Latest
+        <span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Arrivals
+        </span>
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Stay ahead of the trends with our newest products, fresh from our latest collections.
+      </p>
+    </div>
+
+    <!-- Products Carousel -->
+    <div class="relative">
+      <div class="overflow-hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <% @latest_products.each do |product| %>
+            <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 overflow-hidden">
+              <!-- New Badge -->
+              <div class="absolute top-4 left-4 z-10">
+                <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  NEW
+                </span>
+              </div>
+
+              <!-- Product Image -->
+              <%= link_to product_path(product.slug), class: "block" do %>
+                <div class="aspect-square bg-gray-100 overflow-hidden">
+                  <% if product.images.any? %>
+                    <%= image_tag product.images.first,
+                        class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-500",
+                        alt: product.name %>
+                  <% else %>
+                    <div class="w-full h-full flex items-center justify-center">
+                      <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <!-- Product Info -->
+              <div class="p-6">
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= product.category.name %>
+                </span>
+
+                <h3 class="font-bold text-gray-900 mt-2 mb-2 group-hover:text-purple-600 transition-colors">
+                  <%= link_to truncate(product.name, length: 35), product_path(product.slug) %>
+                </h3>
+
+                <div class="flex items-center justify-between mt-4">
+                  <span class="text-xl font-bold text-gray-900">$<%= product.price %></span>
+                  <%= link_to "View", product_path(product.slug),
+                      class: "bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- View All Latest Button -->
+    <div class="text-center mt-12">
+      <%= link_to products_path(sort: 'newest'),
+          class: "inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" do %>
+        View All New Products
+        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+      <% end %>
+    </div>
+  </div>
+</section>
+<% end %>
+
+<!-- Newsletter Section -->
+<section class="py-20 bg-gradient-to-r from-purple-900 via-purple-800 to-blue-900 relative overflow-hidden">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+  </div>
+
+  <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+    <h2 class="text-4xl md:text-5xl font-bold mb-6">
+      Stay in the
+      <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+        Loop
+      </span>
+    </h2>
+
+    <p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+      Get exclusive access to new arrivals, special offers, and style tips delivered straight to your inbox.
+    </p>
+
+    <form class="max-w-md mx-auto flex gap-4">
+      <input type="email"
+             placeholder="Enter your email address"
+             class="flex-1 px-6 py-4 rounded-xl border-0 bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-purple-200 focus:ring-2 focus:ring-yellow-400 focus:bg-opacity-30 transition-all">
+
+      <button type="submit"
+              class="px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-xl hover:from-yellow-300 hover:to-orange-400 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+        Subscribe
+      </button>
+    </form>
+
+    <p class="text-sm text-purple-200 mt-4">
+      No spam, unsubscribe at any time. We respect your privacy.
+    </p>
+  </div>
+</section>
+
+<!-- Empty State Messages (when no products/categories) -->
+<% unless @featured_products.any? || @latest_products.any? || @popular_categories.any? %>
+<section class="py-20 bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="bg-white rounded-2xl p-12 shadow-lg">
+      <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-8">
+        <svg class="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+      </div>
+
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Coming Soon!</h2>
+      <p class="text-lg text-gray-600 mb-8">
+        We're working hard to bring you an amazing collection of products.
+        Check back soon for exciting new arrivals!
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <%= link_to admin_root_path,
+            class: "inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors" do %>
+          <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+          </svg>
+          Add Products
+        <% end %>
+
+        <button class="inline-flex items-center justify-center px-6 py-3 border-2 border-purple-600 text-purple-600 font-semibold rounded-lg hover:bg-purple-600 hover:text-white transition-colors">
+          <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4 1v5l5-5H4z"></path>
+          </svg>
+          Get Notified
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+<% end %>
