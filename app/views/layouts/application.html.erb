@@ -29,10 +29,10 @@
 
   <body class="bg-gray-50 antialiased">
     <!-- Top Banner -->
-    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center py-2 text-sm">
+    <div id="top-banner" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center py-2 text-sm">
       <div class="container mx-auto px-4">
         <i class="fas fa-truck mr-2"></i>Free shipping on orders over $50!
-        <button class="ml-4 text-white/80 hover:text-white">
+        <button class="ml-4 text-white/80 hover:text-white" onclick="document.getElementById('top-banner').style.display='none'">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -62,8 +62,10 @@
                 class: "text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200 #{current_page?(products_path) ? 'text-purple-600 border-b-2 border-purple-600 pb-1' : ''}" %>
             <%= link_to "Categories", categories_path,
                 class: "text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200 #{current_page?(categories_path) ? 'text-purple-600 border-b-2 border-purple-600 pb-1' : ''}" %>
-            <a href="#" class="text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200">About</a>
-            <a href="#" class="text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200">Contact</a>
+            <%= link_to "About", about_path,
+                class: "text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200 #{current_page?(about_path) ? 'text-purple-600 border-b-2 border-purple-600 pb-1' : ''}" %>
+            <%= link_to "Contact", contact_path,
+                class: "text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200 #{current_page?(contact_path) ? 'text-purple-600 border-b-2 border-purple-600 pb-1' : ''}" %>
           </div>
 
           <!-- Search & Actions -->
@@ -221,8 +223,8 @@
           <%= link_to "Home", root_path, class: "block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium" %>
           <%= link_to "Products", products_path, class: "block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium" %>
           <%= link_to "Categories", categories_path, class: "block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium" %>
-          <a href="#" class="block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium">About</a>
-          <a href="#" class="block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium">Contact</a>
+          <%= link_to "About", about_path, class: "block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium" %>
+          <%= link_to "Contact", contact_path, class: "block px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium" %>
         </div>
       </div>
     </nav>
@@ -307,13 +309,13 @@
             <!-- Newsletter Signup -->
             <div class="mb-6">
               <h4 class="text-sm font-semibold mb-2">Subscribe to our newsletter</h4>
-              <div class="flex max-w-md">
-                <input type="email" placeholder="Enter your email"
-                       class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-gray-400">
-                <button class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-r-lg font-medium transition-colors">
-                  Subscribe
-                </button>
-              </div>
+              <%= form_with model: Newsletter.new, url: newsletters_path, local: true, class: "flex max-w-md" do |form| %>
+                <%= form.email_field :email, placeholder: "Enter your email",
+                       class: "flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-gray-400",
+                       required: true %>
+                <%= form.submit "Subscribe",
+                       class: "px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-r-lg font-medium transition-colors" %>
+              <% end %>
             </div>
             <!-- Social Media Icons -->
             <div class="flex space-x-4">
@@ -335,24 +337,24 @@
           <div>
             <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
             <ul class="space-y-3">
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Shipping Info</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Returns & Exchanges</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Size Guide</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+              <li><%= link_to "About Us", about_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Contact", contact_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Shipping Info", shipping_info_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Returns & Exchanges", returns_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Size Guide", size_guide_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "FAQ", faq_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
             </ul>
           </div>
           <!-- Customer Service -->
           <div>
             <h3 class="text-lg font-semibold mb-4">Customer Service</h3>
             <ul class="space-y-3">
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Track Your Order</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Support Center</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Wholesale</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Gift Cards</a></li>
+              <li><%= link_to "Privacy Policy", privacy_policy_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Terms of Service", terms_of_service_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Track Your Order", track_order_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Support Center", support_center_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Wholesale", wholesale_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
+              <li><%= link_to "Gift Cards", gift_cards_path, class: "text-gray-400 hover:text-white transition-colors" %></li>
             </ul>
           </div>
         </div>

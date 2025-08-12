@@ -27,8 +27,13 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
 
-    const button = event.currentTarget
-    const productId = button.dataset.productId || this.productIdValue
+    const form = event.currentTarget
+    const button = form.querySelector('button[type="submit"]')
+    const productIdInput = form.querySelector('input[name="product_id"]')
+    const quantityInput = form.querySelector('input[name="quantity"]')
+
+    const productId = productIdInput ? productIdInput.value : (button.dataset.productId || this.productIdValue)
+    const quantity = quantityInput ? parseInt(quantityInput.value) : 1
 
     if (!productId) {
       this.showError("Product not found")
@@ -46,26 +51,28 @@ export default class extends Controller {
     button.disabled = true
 
     try {
+      const formData = new FormData(form)
+
       const response = await fetch('/cart_items', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
         },
-        body: JSON.stringify({
-          cart_item: {
-            product_id: productId,
-            quantity: 1
-          }
-        })
+        body: formData
       })
 
-      const data = await response.json()
-
       if (response.ok) {
-        this.handleAddSuccess(data, button)
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json()
+          this.handleAddSuccess(data, button)
+        } else {
+          // Handle redirect or HTML response
+          this.handleAddSuccess({ message: 'Added to cart!' }, button)
+        }
       } else {
-        this.handleAddError(data.error || 'Failed to add item to cart', button)
+        const errorText = await response.text()
+        this.handleAddError(errorText || 'Failed to add item to cart', button)
       }
     } catch (error) {
       console.error('Cart add error:', error)

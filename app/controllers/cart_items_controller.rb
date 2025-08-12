@@ -17,10 +17,18 @@ class CartItemsController < ApplicationController
 
         # Check stock availability
         if @product.track_inventory? && new_quantity > @product.inventory_quantity
-          render json: {
-            success: false,
-            message: "Only #{@product.inventory_quantity} items available in stock"
-          }, status: :unprocessable_entity
+          respond_to do |format|
+            format.html do
+              flash[:alert] = "Only #{@product.inventory_quantity} items available in stock"
+              redirect_back(fallback_location: root_path)
+            end
+            format.json do
+              render json: {
+                success: false,
+                message: "Only #{@product.inventory_quantity} items available in stock"
+              }, status: :unprocessable_entity
+            end
+          end
           return
         end
 
@@ -29,10 +37,18 @@ class CartItemsController < ApplicationController
       else
         # Create new cart item
         if @product.track_inventory? && quantity > @product.inventory_quantity
-          render json: {
-            success: false,
-            message: "Only #{@product.inventory_quantity} items available in stock"
-          }, status: :unprocessable_entity
+          respond_to do |format|
+            format.html do
+              flash[:alert] = "Only #{@product.inventory_quantity} items available in stock"
+              redirect_back(fallback_location: root_path)
+            end
+            format.json do
+              render json: {
+                success: false,
+                message: "Only #{@product.inventory_quantity} items available in stock"
+              }, status: :unprocessable_entity
+            end
+          end
           return
         end
 
@@ -45,17 +61,33 @@ class CartItemsController < ApplicationController
         message = "Added to cart"
       end
 
-      render json: {
-        success: true,
-        message: message,
-        cart_item: cart_item_json(@cart_item),
-        cart_summary: cart_summary_json
-      }
+      respond_to do |format|
+        format.html do
+          flash[:notice] = message
+          redirect_back(fallback_location: root_path)
+        end
+        format.json do
+          render json: {
+            success: true,
+            message: message,
+            cart_item: cart_item_json(@cart_item),
+            cart_summary: cart_summary_json
+          }
+        end
+      end
     rescue ActiveRecord::RecordInvalid => e
-      render json: {
-        success: false,
-        message: e.record.errors.full_messages.join(', ')
-      }, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          flash[:alert] = e.record.errors.full_messages.join(', ')
+          redirect_back(fallback_location: root_path)
+        end
+        format.json do
+          render json: {
+            success: false,
+            message: e.record.errors.full_messages.join(', ')
+          }, status: :unprocessable_entity
+        end
+      end
     end
   end
 

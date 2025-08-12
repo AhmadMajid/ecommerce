@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_114226) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_121349) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -150,6 +150,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_114226) do
     t.index ["shipping_method_id"], name: "index_checkouts_on_shipping_method_id"
     t.index ["user_id", "status"], name: "index_checkouts_on_user_id_and_status"
     t.index ["user_id"], name: "index_checkouts_on_user_id"
+  end
+
+  create_table "newsletters", force: :cascade do |t|
+    t.string "email"
+    t.datetime "subscribed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "order_items", force: :cascade do |t|

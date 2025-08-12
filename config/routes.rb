@@ -50,8 +50,19 @@ Rails.application.routes.draw do
   get "about", to: "pages#about"
   get "contact", to: "pages#contact"
   post "contact", to: "pages#create_contact"
+  get "privacy-policy", to: "pages#privacy_policy"
+  get "terms-of-service", to: "pages#terms_of_service"
+  get "shipping-info", to: "pages#shipping_info"
+  get "returns", to: "pages#returns"
+  get "size-guide", to: "pages#size_guide"
+  get "faq", to: "pages#faq"
+  get "track-order", to: "pages#track_order"
+  get "support-center", to: "pages#support_center"
+  get "wholesale", to: "pages#wholesale"
+  get "gift-cards", to: "pages#gift_cards"
 
-  # User account routes
+  # Newsletter subscription
+  resources :newsletters, only: [:create]  # User account routes
   resources :users, only: [:show, :edit, :update] do
     member do
       get :profile

@@ -1,0 +1,238 @@
+<% content_for :title, @page_title %>
+<% content_for :description, @page_description %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <h1 class="text-4xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h1>
+
+  <div class="space-y-8">
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Orders & Shipping</h2>
+
+      <div class="space-y-4">
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('order-1')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">How long does shipping take?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="order-1-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="order-1">
+            <p class="text-gray-600">
+              Standard shipping takes 5-7 business days, Express shipping takes 2-3 business days,
+              and Next Day delivery is available for orders placed before 2 PM. Free shipping is
+              available on orders over $75.
+            </p>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('order-2')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">Can I change or cancel my order?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="order-2-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="order-2">
+            <p class="text-gray-600">
+              You can modify or cancel your order within 1 hour of placing it. After that,
+              orders enter our fulfillment process and changes aren't possible. Please
+              <%= link_to "contact us", contact_path, class: "text-purple-600 hover:text-purple-800" %>
+              immediately if you need to make changes.
+            </p>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('order-3')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">Do you ship internationally?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="order-3-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="order-3">
+            <p class="text-gray-600">
+              Yes! We ship to over 50 countries worldwide. International shipping costs start at $19.99
+              and delivery times vary by destination (typically 7-14 business days). Customs duties
+              and taxes may apply and are the responsibility of the customer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Returns & Exchanges</h2>
+
+      <div class="space-y-4">
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('return-1')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">What is your return policy?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="return-1-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="return-1">
+            <p class="text-gray-600">
+              We offer a 30-day return policy for all items in original condition with tags attached.
+              Returns are free and easy - just log into your account to start a return.
+              View our complete <%= link_to "returns policy", returns_path, class: "text-purple-600 hover:text-purple-800" %>
+              for more details.
+            </p>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('return-2')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">How do I exchange an item?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="return-2-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="return-2">
+            <p class="text-gray-600">
+              For the fastest exchange, we recommend ordering the new item and returning the original
+              item separately. This ensures you get your new item quickly without waiting for return
+              processing. Both transactions follow our standard policies.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Products & Sizing</h2>
+
+      <div class="space-y-4">
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('product-1')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">How do I find my size?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="product-1-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="product-1">
+            <p class="text-gray-600">
+              Check our comprehensive <%= link_to "size guide", size_guide_path, class: "text-purple-600 hover:text-purple-800" %>
+              for detailed measurements and sizing charts for all our products. If you're between sizes,
+              we generally recommend sizing up for comfort.
+            </p>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('product-2')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">Are your products authentic?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="product-2-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="product-2">
+            <p class="text-gray-600">
+              Absolutely! We guarantee 100% authentic products. We work directly with brands and
+              authorized distributors to ensure authenticity. All items come with original tags,
+              packaging, and authenticity guarantees where applicable.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Account & Payment</h2>
+
+      <div class="space-y-4">
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('account-1')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">What payment methods do you accept?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="account-1-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="account-1">
+            <p class="text-gray-600">
+              We accept all major credit cards (Visa, Mastercard, American Express), PayPal,
+              Apple Pay, and Google Pay. All payments are processed securely with industry-standard
+              encryption to protect your information.
+            </p>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg">
+          <button class="w-full px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                  onclick="toggleFAQ('account-2')">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">Do I need an account to shop?</h3>
+              <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="account-2-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="hidden px-6 pb-4" id="account-2">
+            <p class="text-gray-600">
+              You can checkout as a guest, but creating an account offers many benefits: faster checkout,
+              order history, easy returns, wishlist, and exclusive member offers. Creating an account
+              is free and takes less than a minute.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Still Have Questions?</h2>
+      <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-purple-900 mb-2">Contact Our Support Team</h3>
+        <p class="text-purple-800 mb-4">
+          Can't find the answer you're looking for? Our friendly customer service team is here to help!
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <%= link_to "Contact Support", contact_path,
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" %>
+          <div class="text-sm text-purple-700">
+            <p><strong>Email:</strong> support@stylemart.com</p>
+            <p><strong>Phone:</strong> (555) 123-4567 (Mon-Fri 9AM-6PM EST)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+function toggleFAQ(id) {
+  const element = document.getElementById(id);
+  const icon = document.getElementById(id + '-icon');
+
+  if (element.classList.contains('hidden')) {
+    element.classList.remove('hidden');
+    icon.classList.add('rotate-180');
+  } else {
+    element.classList.add('hidden');
+    icon.classList.remove('rotate-180');
+  }
+}
+</script>

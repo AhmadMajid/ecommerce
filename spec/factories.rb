@@ -1,4 +1,9 @@
 FactoryBot.define do
+  factory :newsletter do
+    email { "MyString" }
+    subscribed_at { "2025-08-12 13:13:50" }
+  end
+
   factory :user do
     email { Faker::Internet.email }
     password { 'password123' }

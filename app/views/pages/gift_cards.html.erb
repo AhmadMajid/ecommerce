@@ -1,0 +1,441 @@
+<% content_for :title, @page_title %>
+<% content_for :description, @page_description %>
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Hero Section -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">Gift Cards</h1>
+    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+      Give the perfect gift with our digital gift cards. Delivered instantly via email
+      and valid for all products on our website.
+    </p>
+  </div>
+
+  <!-- Gift Card Options -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <!-- Purchase Section -->
+    <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Purchase Gift Card</h2>
+
+      <form class="space-y-6">
+        <!-- Amount Selection -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-4">Choose Amount</label>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button type="button" class="amount-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-amount="25">
+              <div class="text-lg font-semibold text-gray-900">$25</div>
+            </button>
+            <button type="button" class="amount-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-amount="50">
+              <div class="text-lg font-semibold text-gray-900">$50</div>
+            </button>
+            <button type="button" class="amount-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-amount="100">
+              <div class="text-lg font-semibold text-gray-900">$100</div>
+            </button>
+            <button type="button" class="amount-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-amount="150">
+              <div class="text-lg font-semibold text-gray-900">$150</div>
+            </button>
+          </div>
+
+          <div class="relative">
+            <input type="number"
+                   id="custom_amount"
+                   name="custom_amount"
+                   placeholder="Custom amount"
+                   min="10"
+                   max="1000"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-500">$</span>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">
+            Minimum $10, Maximum $1,000
+          </p>
+        </div>
+
+        <!-- Design Selection -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-4">Choose Design</label>
+          <div class="grid grid-cols-2 gap-4">
+            <button type="button" class="design-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-design="birthday">
+              <div class="w-full h-24 bg-gradient-to-r from-pink-400 to-purple-600 rounded-lg mb-2 flex items-center justify-center">
+                <span class="text-white font-semibold">🎉 Birthday</span>
+              </div>
+            </button>
+            <button type="button" class="design-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-design="holiday">
+              <div class="w-full h-24 bg-gradient-to-r from-red-400 to-green-600 rounded-lg mb-2 flex items-center justify-center">
+                <span class="text-white font-semibold">🎄 Holiday</span>
+              </div>
+            </button>
+            <button type="button" class="design-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-design="celebration">
+              <div class="w-full h-24 bg-gradient-to-r from-yellow-400 to-orange-600 rounded-lg mb-2 flex items-center justify-center">
+                <span class="text-white font-semibold">🎊 Celebration</span>
+              </div>
+            </button>
+            <button type="button" class="design-btn border-2 border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 focus:border-purple-500 transition-colors" data-design="classic">
+              <div class="w-full h-24 bg-gradient-to-r from-gray-400 to-gray-600 rounded-lg mb-2 flex items-center justify-center">
+                <span class="text-white font-semibold">✨ Classic</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recipient Information -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">Recipient Information</h3>
+
+          <div>
+            <label for="recipient_name" class="block text-sm font-medium text-gray-700 mb-2">
+              Recipient Name
+            </label>
+            <input type="text"
+                   id="recipient_name"
+                   name="recipient_name"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                   required>
+          </div>
+
+          <div>
+            <label for="recipient_email" class="block text-sm font-medium text-gray-700 mb-2">
+              Recipient Email
+            </label>
+            <input type="email"
+                   id="recipient_email"
+                   name="recipient_email"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                   required>
+          </div>
+
+          <div>
+            <label for="sender_name" class="block text-sm font-medium text-gray-700 mb-2">
+              Your Name
+            </label>
+            <input type="text"
+                   id="sender_name"
+                   name="sender_name"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                   required>
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+              Personal Message (Optional)
+            </label>
+            <textarea id="message"
+                      name="message"
+                      rows="3"
+                      maxlength="200"
+                      placeholder="Add a personal message..."
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"></textarea>
+            <p class="text-sm text-gray-500 mt-1">Maximum 200 characters</p>
+          </div>
+        </div>
+
+        <!-- Delivery Options -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-4">Delivery Options</label>
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <input type="radio"
+                     id="send_now"
+                     name="delivery_option"
+                     value="now"
+                     class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                     checked>
+              <label for="send_now" class="ml-2 block text-sm text-gray-700">
+                Send immediately
+              </label>
+            </div>
+            <div class="flex items-center">
+              <input type="radio"
+                     id="send_later"
+                     name="delivery_option"
+                     value="scheduled"
+                     class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300">
+              <label for="send_later" class="ml-2 block text-sm text-gray-700">
+                Schedule for later
+              </label>
+            </div>
+            <div id="schedule_date" class="ml-6 hidden">
+              <input type="datetime-local"
+                     id="scheduled_date"
+                     name="scheduled_date"
+                     class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+          Add to Cart
+        </button>
+      </form>
+    </div>
+
+    <!-- Gift Card Preview -->
+    <div class="bg-gray-50 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Gift Card Preview</h3>
+
+      <div class="bg-white rounded-lg p-6 shadow-lg mb-6">
+        <div id="gift-card-preview" class="w-full h-48 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+          <div class="text-center text-white">
+            <div class="text-2xl font-bold mb-2">$50</div>
+            <div class="text-sm opacity-90">Gift Card</div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">To:</span>
+            <span id="preview-recipient" class="text-sm text-gray-900">Recipient Name</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">From:</span>
+            <span id="preview-sender" class="text-sm text-gray-900">Your Name</span>
+          </div>
+          <div class="mt-4">
+            <p id="preview-message" class="text-sm text-gray-700 italic">
+              Your personal message will appear here...
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gift Card Benefits -->
+      <div class="space-y-3">
+        <h4 class="font-medium text-gray-900">Gift Card Benefits:</h4>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            No expiration date
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Can be used on any product
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Delivered instantly via email
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Free to purchase and send
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Easy to redeem at checkout
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">How Gift Cards Work</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">1. Purchase</h3>
+        <p class="text-gray-600">
+          Choose an amount, select a design, and add recipient details.
+          Complete your purchase securely online.
+        </p>
+      </div>
+
+      <div class="text-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">2. Delivery</h3>
+        <p class="text-gray-600">
+          The gift card is instantly sent to the recipient's email
+          with your personal message and redemption code.
+        </p>
+      </div>
+
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">3. Redeem</h3>
+        <p class="text-gray-600">
+          The recipient enters the gift card code at checkout
+          to apply the credit to their purchase.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Check Balance Section -->
+  <div class="bg-gray-50 rounded-lg p-8">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Check Gift Card Balance</h2>
+      <p class="text-gray-600 mb-6">
+        Enter your gift card code to check your remaining balance.
+      </p>
+
+      <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+        <input type="text"
+               placeholder="Enter gift card code"
+               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+               required>
+        <button type="submit"
+                class="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors">
+          Check Balance
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="mt-12">
+    <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">Frequently Asked Questions</h2>
+
+    <div class="max-w-3xl mx-auto space-y-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Do gift cards expire?</h3>
+        <p class="text-gray-600">
+          No, our gift cards never expire. Recipients can use them whenever they're ready to shop.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Can gift cards be used for sale items?</h3>
+        <p class="text-gray-600">
+          Yes, gift cards can be applied to any product on our website, including sale and clearance items.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">What if my purchase is less than the gift card amount?</h3>
+        <p class="text-gray-600">
+          Any remaining balance will stay on the gift card for future purchases. The recipient can check their balance anytime.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I return or exchange a gift card?</h3>
+        <p class="text-gray-600">
+          Gift card purchases are final and cannot be returned or exchanged. However, if there's an issue with delivery, please contact our support team.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I use multiple gift cards on one order?</h3>
+        <p class="text-gray-600">
+          Yes, you can apply multiple gift cards to a single order during checkout until the full amount is covered.
+        </p>
+      </div>
+    </div>
+
+    <div class="text-center mt-8">
+      <p class="text-gray-600 mb-4">
+        Have more questions about gift cards?
+      </p>
+      <%= link_to "Contact Support", contact_path,
+          class: "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Amount selection
+  const amountButtons = document.querySelectorAll('.amount-btn');
+  const customAmountInput = document.getElementById('custom_amount');
+  const giftCardPreview = document.getElementById('gift-card-preview');
+
+  amountButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      amountButtons.forEach(btn => btn.classList.remove('border-purple-500', 'bg-purple-50'));
+      this.classList.add('border-purple-500', 'bg-purple-50');
+      customAmountInput.value = '';
+      updatePreviewAmount(this.dataset.amount);
+    });
+  });
+
+  customAmountInput.addEventListener('input', function() {
+    amountButtons.forEach(btn => btn.classList.remove('border-purple-500', 'bg-purple-50'));
+    if (this.value) {
+      updatePreviewAmount(this.value);
+    }
+  });
+
+  // Design selection
+  const designButtons = document.querySelectorAll('.design-btn');
+  designButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      designButtons.forEach(btn => btn.classList.remove('border-purple-500', 'bg-purple-50'));
+      this.classList.add('border-purple-500', 'bg-purple-50');
+      updatePreviewDesign(this.dataset.design);
+    });
+  });
+
+  // Delivery options
+  const deliveryRadios = document.querySelectorAll('input[name="delivery_option"]');
+  const scheduleDate = document.getElementById('schedule_date');
+
+  deliveryRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'scheduled') {
+        scheduleDate.classList.remove('hidden');
+      } else {
+        scheduleDate.classList.add('hidden');
+      }
+    });
+  });
+
+  // Live preview updates
+  document.getElementById('recipient_name').addEventListener('input', function() {
+    document.getElementById('preview-recipient').textContent = this.value || 'Recipient Name';
+  });
+
+  document.getElementById('sender_name').addEventListener('input', function() {
+    document.getElementById('preview-sender').textContent = this.value || 'Your Name';
+  });
+
+  document.getElementById('message').addEventListener('input', function() {
+    document.getElementById('preview-message').textContent = this.value || 'Your personal message will appear here...';
+  });
+
+  function updatePreviewAmount(amount) {
+    const preview = giftCardPreview.querySelector('.text-2xl');
+    preview.textContent = '$' + amount;
+  }
+
+  function updatePreviewDesign(design) {
+    const gradients = {
+      birthday: 'from-pink-400 to-purple-600',
+      holiday: 'from-red-400 to-green-600',
+      celebration: 'from-yellow-400 to-orange-600',
+      classic: 'from-gray-400 to-gray-600'
+    };
+
+    giftCardPreview.className = `w-full h-48 bg-gradient-to-r ${gradients[design]} rounded-lg flex items-center justify-center mb-4`;
+  }
+
+  // Initialize with default selections
+  amountButtons[1].click(); // $50
+  designButtons[3].click(); // Classic
+});
+</script>

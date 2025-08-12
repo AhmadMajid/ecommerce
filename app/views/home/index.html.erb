@@ -180,7 +180,7 @@
     </div>
 
     <!-- Products Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
       <% @featured_products.each do |product| %>
         <div class="group relative bg-white rounded-xl lg:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden">
           <!-- Sale Badge -->
@@ -480,16 +480,15 @@
       Get exclusive access to new arrivals, special offers, and style tips delivered straight to your inbox.
     </p>
 
-    <form class="max-w-md mx-auto flex gap-4">
-      <input type="email"
-             placeholder="Enter your email address"
-             class="flex-1 px-6 py-4 rounded-xl border-0 bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-purple-200 focus:ring-2 focus:ring-yellow-400 focus:bg-opacity-30 transition-all">
+    <%= form_with model: Newsletter.new, url: newsletters_path, local: true, class: "max-w-md mx-auto flex gap-4" do |form| %>
+      <%= form.email_field :email,
+             placeholder: "Enter your email address",
+             class: "flex-1 px-6 py-4 rounded-xl border-2 border-white border-opacity-30 bg-white bg-opacity-10 backdrop-blur-lg text-white placeholder-purple-200 focus:ring-2 focus:ring-yellow-400 focus:bg-opacity-20 focus:border-yellow-400 transition-all",
+             required: true %>
 
-      <button type="submit"
-              class="px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-xl hover:from-yellow-300 hover:to-orange-400 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-        Subscribe
-      </button>
-    </form>
+      <%= form.submit "Subscribe",
+              class: "px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-xl hover:from-yellow-300 hover:to-orange-400 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" %>
+    <% end %>
 
     <p class="text-sm text-purple-200 mt-4">
       No spam, unsubscribe at any time. We respect your privacy.
