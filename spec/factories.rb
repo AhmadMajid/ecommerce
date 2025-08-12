@@ -58,7 +58,7 @@ FactoryBot.define do
     description { Faker::Lorem.paragraph }
     short_description { Faker::Lorem.sentence }
     sku { Faker::Alphanumeric.alphanumeric(number: 8).upcase }
-    slug { name.parameterize }
+    slug { name&.parameterize }
     price { Faker::Commerce.price(range: 10..100) }
     weight { Faker::Number.decimal(l_digits: 2, r_digits: 3) }
     inventory_quantity { 100 }  # Ensure sufficient inventory for tests

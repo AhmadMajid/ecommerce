@@ -61,7 +61,7 @@ RSpec.describe 'Admin Contact Messages Management', type: :request do
         get admin_contact_message_path(contact_message)
 
         expect(response).to have_http_status(:success)
-        expect(response.body).to include(contact_message.name)
+        expect(response.body).to include(CGI.escapeHTML(contact_message.name))
         expect(response.body).to include(contact_message.email)
         expect(response.body).to include(contact_message.subject)
         expect(response.body).to include(contact_message.message)
@@ -242,9 +242,8 @@ RSpec.describe 'Admin Contact Messages Management', type: :request do
     end
 
     it 'handles non-existent contact message gracefully' do
-      expect {
-        get admin_contact_message_path(id: 999999)
-      }.to raise_error(ActiveRecord::RecordNotFound)
+      get admin_contact_message_path(id: 999999)
+      expect(response).to have_http_status(:not_found)
     end
 
     it 'handles invalid bulk action parameters' do
@@ -261,12 +260,15 @@ RSpec.describe 'Admin Contact Messages Management', type: :request do
 
     it 'handles bulk action with no messages selected' do
       post bulk_action_admin_contact_messages_path, params: {
-        bulk_action: 'mark_as_read',
-        message_ids: []
+        bulk_action: 'mark_as_read'
+        # Omitting message_ids entirely
       }
 
       expect(response).to redirect_to(admin_contact_messages_path)
-      expect(flash[:alert]).to eq('No messages selected.')
+
+      # Follow the redirect to see the flash message
+      follow_redirect!
+      expect(response.body).to include('No messages selected.')
     end
   end
 end

@@ -1,5 +1,5 @@
 class Admin::ContactMessagesController < Admin::BaseController
-  before_action :set_contact_message, only: [:show, :mark_as_read, :mark_as_replied, :destroy]
+  before_action :set_contact_message, only: [:show, :mark_as_read, :mark_as_replied, :archive, :destroy]
 
   def index
     @contact_messages = ContactMessage.recent
@@ -35,16 +35,21 @@ class Admin::ContactMessagesController < Admin::BaseController
     redirect_to admin_contact_messages_path, notice: 'Message marked as replied.'
   end
 
+  def archive
+    @contact_message.update!(status: 'archived')
+    redirect_to admin_contact_messages_path, notice: 'Message archived.'
+  end
+
   def destroy
     @contact_message.destroy!
     redirect_to admin_contact_messages_path, notice: 'Message deleted successfully.'
   end
 
   def bulk_action
-    message_ids = params[:message_ids] || []
+    message_ids = params[:message_ids]
     action = params[:bulk_action]
 
-    if message_ids.empty?
+    if message_ids.blank? || message_ids.empty?
       redirect_to admin_contact_messages_path, alert: 'No messages selected.'
       return
     end
@@ -53,7 +58,7 @@ class Admin::ContactMessagesController < Admin::BaseController
 
     case action
     when 'mark_as_read'
-      messages.where(status: 'new').update_all(status: 'read', read_at: Time.current)
+      messages.where(status: 'pending').update_all(status: 'read', read_at: Time.current)
       redirect_to admin_contact_messages_path, notice: "#{messages.count} messages marked as read."
     when 'mark_as_replied'
       messages.where(status: 'read').update_all(status: 'replied')

@@ -43,7 +43,7 @@ class Product < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :inactive, -> { where(active: false) }
   scope :featured, -> { where(featured: true) }
-  scope :published, -> { where('published_at IS NULL OR published_at <= ?', Time.current) }
+  scope :published, -> { where('published_at IS NOT NULL AND published_at <= ?', Time.current) }
   scope :available, -> { active.published }
   scope :in_stock, -> { where('inventory_quantity > 0 OR track_inventory = false OR allow_backorders = true') }
   scope :low_stock, -> { where('inventory_quantity <= low_stock_threshold AND track_inventory = true') }

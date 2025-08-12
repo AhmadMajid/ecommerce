@@ -29,13 +29,18 @@ module RequestSpecHelpers
 
   def mock_authentication_methods(user, cart)
     # Mock all the authentication and cart-related methods
-    # Since Devise methods are dynamically included, we need to stub them properly
-    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
-    allow_any_instance_of(ApplicationController).to receive(:user_signed_in?).and_return(!!user)
-    allow_any_instance_of(ApplicationController).to receive(:current_cart).and_return(cart)
+    # Since Devise methods are dynamically included, we need to use a different approach
 
-    # Also mock authenticate_user! to avoid authentication failures
-    allow_any_instance_of(ApplicationController).to receive(:authenticate_user!).and_return(true)
+    # For controllers that include Devise functionality
+    allow_any_instance_of(CartItemsController).to receive(:current_user).and_return(user)
+    allow_any_instance_of(CartItemsController).to receive(:user_signed_in?).and_return(!!user)
+    allow_any_instance_of(CartItemsController).to receive(:current_cart).and_return(cart)
+    allow_any_instance_of(CartItemsController).to receive(:authenticate_user!).and_return(true)
+
+    allow_any_instance_of(CartsController).to receive(:current_user).and_return(user)
+    allow_any_instance_of(CartsController).to receive(:user_signed_in?).and_return(!!user)
+    allow_any_instance_of(CartsController).to receive(:current_cart).and_return(cart)
+    allow_any_instance_of(CartsController).to receive(:authenticate_user!).and_return(true)
 
     # Mock specific controller methods for cart and checkout controllers
     [CartItemsController, CartsController, CheckoutController].each do |controller_class|

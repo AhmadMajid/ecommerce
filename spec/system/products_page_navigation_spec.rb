@@ -47,7 +47,7 @@ RSpec.describe 'Products Page Navigation', type: :system do
     end
 
     it 'has search functionality' do
-      within('.bg-white.rounded-lg.shadow-sm') do  # The filter sidebar
+      within('.w-full.lg\\:w-64 .bg-white.rounded-lg.shadow-sm') do  # The filter sidebar specifically
         fill_in 'search', with: 'Smartphone'
         click_button 'Filter'
       end
@@ -57,7 +57,7 @@ RSpec.describe 'Products Page Navigation', type: :system do
     end
 
     it 'has category filtering' do
-      within('.bg-white.rounded-lg.shadow-sm') do  # The filter sidebar
+      within('.w-full.lg\\:w-64 .bg-white.rounded-lg.shadow-sm') do  # The filter sidebar specifically
         select @category.name, from: 'category_id'
         click_button 'Filter'
       end
@@ -67,7 +67,7 @@ RSpec.describe 'Products Page Navigation', type: :system do
     end
 
     it 'has price range filtering' do
-      within('.bg-white.rounded-lg.shadow-sm') do  # The filter sidebar
+      within('.w-full.lg\\:w-64 .bg-white.rounded-lg.shadow-sm') do  # The filter sidebar specifically
         fill_in 'min_price', with: '500'
         fill_in 'max_price', with: '700'
         click_button 'Filter'
