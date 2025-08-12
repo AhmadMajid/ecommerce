@@ -1,4 +1,27 @@
 FactoryBot.define do
+  factory :contact_message do
+    name { Faker::Name.name }
+    email { Faker::Internet.email }
+    subject { Faker::Lorem.sentence(word_count: 6) }
+    message { Faker::Lorem.paragraph(sentence_count: 5) }
+    status { :pending }
+
+    trait :read do
+      status { :read }
+      read_at { Time.current }
+    end
+
+    trait :replied do
+      status { :replied }
+      read_at { 1.hour.ago }
+    end
+
+    trait :archived do
+      status { :archived }
+      read_at { 2.hours.ago }
+    end
+  end
+
   factory :newsletter do
     email { "MyString" }
     subscribed_at { "2025-08-12 13:13:50" }

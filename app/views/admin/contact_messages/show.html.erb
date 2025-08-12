@@ -1,0 +1,289 @@
+<% content_f      <span class    <div class="flex items-center space-x-2">
+      <% if @contact_message.pending? %>
+        <%= link_to "Mark as Read", mark_as_read_admin_contact_message_path(@contact_message),
+            method: :patch, class: "btn btn-outline-primary" %>line-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                 <%= case @contact_message.status
+                     when 'pending' then 'bg-red-100 text-red-800'
+                     when 'read' then 'bg-yellow-100 text-yellow-800'
+                     when 'replied' then 'bg-green-100 text-green-800'
+                     when 'archived' then 'bg-gray-100 text-gray-800'
+                     end %>"le, "Contact Message - #{@contact_message.subject}") %>
+
+<div class="mb-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <%= link_to admin_contact_messages_path, class: "text-gray-600 hover:text-gray-900" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      <% end %>
+      <h1 class="text-2xl font-bold text-gray-900">Contact Message</h1>
+
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                 <%= case @contact_message.status
+                     when 'new' then 'bg-red-100 text-red-800'
+                     when 'read' then 'bg-yellow-100 text-yellow-800'
+                     when 'replied' then 'bg-green-100 text-green-800'
+                     when 'archived' then 'bg-gray-100 text-gray-800'
+                     end %>">
+        <%= @contact_message.status.titleize %>
+      </span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <% if @contact_message.new? %>
+        <%= link_to "Mark as Read", mark_as_read_admin_contact_message_path(@contact_message),
+            method: :patch, class: "btn btn-outline-primary" %>
+      <% elsif @contact_message.read? %>
+        <%= link_to "Mark as Replied", mark_as_replied_admin_contact_message_path(@contact_message),
+            method: :patch, class: "btn btn-outline-success" %>
+      <% end %>
+
+      <%= link_to "Archive", archive_admin_contact_message_path(@contact_message),
+          method: :patch, class: "btn btn-outline-secondary" %>
+
+      <%= link_to "Delete", admin_contact_message_path(@contact_message),
+          method: :delete, class: "btn btn-outline-danger",
+          confirm: "Are you sure you want to delete this message?" %>
+    </div>
+  </div>
+</div>
+
+<!-- Message Details -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+  <div class="border-b border-gray-200 px-6 py-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Name</dt>
+            <dd class="text-sm text-gray-900"><%= @contact_message.name %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Email</dt>
+            <dd class="text-sm text-gray-900">
+              <a href="mailto:<%= @contact_message.email %>" class="text-purple-600 hover:text-purple-800">
+                <%= @contact_message.email %>
+              </a>
+            </dd>
+          </div>
+          <% if @contact_message.phone.present? %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Phone</dt>
+              <dd class="text-sm text-gray-900">
+                <a href="tel:<%= @contact_message.phone %>" class="text-purple-600 hover:text-purple-800">
+                  <%= @contact_message.phone %>
+                </a>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Message Details</h3>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Subject</dt>
+            <dd class="text-sm text-gray-900"><%= @contact_message.subject %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Received</dt>
+            <dd class="text-sm text-gray-900">
+              <%= @contact_message.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+              <span class="text-gray-500">(<%= time_ago_in_words(@contact_message.created_at) %> ago)</span>
+            </dd>
+          </div>
+          <% if @contact_message.updated_at != @contact_message.created_at %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+              <dd class="text-sm text-gray-900">
+                <%= @contact_message.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
+                <span class="text-gray-500">(<%= time_ago_in_words(@contact_message.updated_at) %> ago)</span>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Content -->
+  <div class="px-6 py-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Message</h3>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div class="text-gray-800 whitespace-pre-wrap"><%= @contact_message.message %></div>
+    </div>
+  </div>
+
+  <!-- Quick Reply Section -->
+  <div class="border-t border-gray-200 px-6 py-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Reply</h3>
+
+    <div class="space-y-4">
+      <!-- Email Template Buttons -->
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="insertTemplate('thank_you')">
+          Thank You
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="insertTemplate('more_info')">
+          Request More Info
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="insertTemplate('follow_up')">
+          Follow Up
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="insertTemplate('resolved')">
+          Issue Resolved
+        </button>
+      </div>
+
+      <!-- Reply Form -->
+      <%= form_with url: "mailto:#{@contact_message.email}?subject=Re: #{@contact_message.subject}",
+          target: "_blank", local: true, class: "space-y-4" do |form| %>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Your Reply</label>
+          <textarea id="reply-textarea" rows="6"
+                    class="form-textarea w-full"
+                    placeholder="Type your reply here..."></textarea>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <p class="text-sm text-gray-500">
+            This will open your default email client with a pre-filled message to
+            <strong><%= @contact_message.email %></strong>
+          </p>
+
+          <div class="flex space-x-2">
+            <button type="button" onclick="copyReply()" class="btn btn-outline-secondary">
+              Copy Reply
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Open Email Client
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="mt-6 flex justify-between">
+  <% if @prev_message %>
+    <%= link_to admin_contact_message_path(@prev_message), class: "btn btn-outline-secondary" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Previous Message
+    <% end %>
+  <% else %>
+    <div></div>
+  <% end %>
+
+  <% if @next_message %>
+    <%= link_to admin_contact_message_path(@next_message), class: "btn btn-outline-secondary" do %>
+      Next Message
+      <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </% end %>
+  <% else %>
+    <div></div>
+  <% end %>
+</div>
+
+<script>
+// Email templates
+const templates = {
+  thank_you: `Hi <%= @contact_message.name %>,
+
+Thank you for contacting us! We appreciate you taking the time to reach out.
+
+We have received your message regarding "<%= @contact_message.subject %>" and will get back to you as soon as possible.
+
+Best regards,
+The Team`,
+
+  more_info: `Hi <%= @contact_message.name %>,
+
+Thank you for your message about "<%= @contact_message.subject %>".
+
+To better assist you, could you please provide a bit more information about:
+- [Specific detail needed]
+- [Another detail if needed]
+
+This will help us give you the most accurate and helpful response.
+
+Best regards,
+The Team`,
+
+  follow_up: `Hi <%= @contact_message.name %>,
+
+I wanted to follow up on your message about "<%= @contact_message.subject %>".
+
+[Add your follow-up message here]
+
+Please let me know if you have any other questions or if there's anything else I can help you with.
+
+Best regards,
+The Team`,
+
+  resolved: `Hi <%= @contact_message.name %>,
+
+Thank you for contacting us about "<%= @contact_message.subject %>".
+
+[Add resolution details here]
+
+If you have any other questions or concerns, please don't hesitate to reach out.
+
+Best regards,
+The Team`
+};
+
+function insertTemplate(templateName) {
+  const textarea = document.getElementById('reply-textarea');
+  const template = templates[templateName];
+
+  if (template && textarea) {
+    textarea.value = template;
+    textarea.focus();
+  }
+}
+
+function copyReply() {
+  const textarea = document.getElementById('reply-textarea');
+
+  if (textarea && textarea.value.trim()) {
+    navigator.clipboard.writeText(textarea.value).then(function() {
+      // Show success feedback
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = 'Copied!';
+      button.classList.add('btn-success');
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('btn-success');
+      }, 2000);
+    }).catch(function(err) {
+      alert('Failed to copy reply to clipboard');
+    });
+  } else {
+    alert('Please enter a reply first');
+  }
+}
+
+// Auto-mark as read when viewing
+<% if @contact_message.pending? %>
+setTimeout(() => {
+  fetch('<%= mark_as_read_admin_contact_message_path(@contact_message) %>', {
+    method: 'PATCH',
+    headers: {
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+      'Content-Type': 'application/json'
+    }
+  });
+}, 2000);
+<% end %>
+</script>

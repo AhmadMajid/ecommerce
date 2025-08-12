@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Quick Access</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .button { background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 10px 10px 10px 0; }
+        .button:hover { background: #5b21b6; }
+        .info { background: #e0f2fe; padding: 15px; border-radius: 6px; margin: 10px 0; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .code { background: #f1f3f4; padding: 8px; border-radius: 4px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 StyleMart Admin Access</h1>
+
+        <div class="card success">
+            <h3>✅ Admin Setup Complete!</h3>
+            <p>The contact message system is ready for use.</p>
+        </div>
+
+        <div class="card">
+            <h3>🔐 Admin Login</h3>
+            <p><strong>Email:</strong> <span class="code">admin@stylemart.com</span></p>
+            <p><strong>Password:</strong> <span class="code">password123</span></p>
+
+            <a href="http://localhost:3000/users/sign_in" class="button">Sign In to Admin</a>
+        </div>
+
+        <div class="card">
+            <h3>📧 Contact Messages</h3>
+            <p>Access the contact message management interface:</p>
+
+            <a href="http://localhost:3000/admin/contact_messages" class="button">Contact Messages Admin</a>
+            <a href="http://localhost:3000/contact" class="button" style="background: #10b981;">Test Contact Form</a>
+        </div>
+
+        <div class="card warning">
+            <h3>⚠️ Access Requirements</h3>
+            <p>The admin routes require:</p>
+            <ul>
+                <li>User authentication (sign in)</li>
+                <li>Admin role privileges</li>
+            </ul>
+            <p>If you're not signed in, you'll be redirected to the login page.</p>
+        </div>
+
+        <div class="card info">
+            <h3>📊 Current Status</h3>
+            <p>Contact messages are stored in PostgreSQL database:</p>
+            <ul>
+                <li><strong>Database:</strong> ecommerce_app_development</li>
+                <li><strong>Table:</strong> contact_messages</li>
+                <li><strong>Total Messages:</strong> 3</li>
+                <li><strong>Pending Review:</strong> 2</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🛠️ Development Tools</h3>
+            <p>Additional access methods:</p>
+            <ul>
+                <li><strong>Rails Console:</strong> <span class="code">bin/rails console</span></li>
+                <li><strong>Check Messages:</strong> <span class="code">./check_messages.sh</span></li>
+                <li><strong>Database Direct:</strong> <span class="code">psql ecommerce_app_development</span></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🎯 Quick Actions</h3>
+            <a href="http://localhost:3000/" class="button" style="background: #6b7280;">Home Page</a>
+            <a href="http://localhost:3000/contact" class="button" style="background: #10b981;">Contact Form</a>
+            <a href="http://localhost:3000/admin" class="button" style="background: #f59e0b;">Admin Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

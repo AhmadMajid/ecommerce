@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_121349) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_141923) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -150,6 +150,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_121349) do
     t.index ["shipping_method_id"], name: "index_checkouts_on_shipping_method_id"
     t.index ["user_id", "status"], name: "index_checkouts_on_user_id_and_status"
     t.index ["user_id"], name: "index_checkouts_on_user_id"
+  end
+
+  create_table "contact_messages", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email", null: false
+    t.string "subject", null: false
+    t.text "message", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_contact_messages_on_created_at"
+    t.index ["status", "created_at"], name: "index_contact_messages_on_status_and_created_at"
+    t.index ["status"], name: "index_contact_messages_on_status"
   end
 
   create_table "newsletters", force: :cascade do |t|

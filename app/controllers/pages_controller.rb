@@ -14,8 +14,18 @@ class PagesController < ApplicationController
     @contact = ContactForm.new(contact_params)
 
     if @contact.valid?
-      # Here you would typically send an email or save to database
-      # For now, we'll just show a success message
+      # Save the contact message to the database
+      contact_message = ContactMessage.create!(
+        name: @contact.name,
+        email: @contact.email,
+        subject: @contact.subject,
+        message: @contact.message,
+        status: 'pending'
+      )
+
+      # TODO: Send email notification to site owners
+      # ContactMailer.new_message(contact_message).deliver_later
+
       redirect_to contact_path, notice: "Thank you for your message! We'll get back to you soon."
     else
       @page_title = "Contact Us"
