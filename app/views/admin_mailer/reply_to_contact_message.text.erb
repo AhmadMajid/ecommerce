@@ -1,0 +1,13 @@
+<%= @reply_content %>
+
+---
+
+Original message:
+From: <%= @contact_message.name %>
+Subject: <%= @contact_message.subject %>
+Date: <%= @contact_message.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+
+<%= @contact_message.message %>
+
+---
+This email was sent in response to your message submitted through our website contact form.

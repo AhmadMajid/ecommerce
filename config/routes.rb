@@ -109,9 +109,11 @@ Rails.application.routes.draw do
 
     resources :contact_messages, only: [:index, :show, :destroy] do
       member do
+        patch :mark_as_pending
         patch :mark_as_read
         patch :mark_as_replied
         patch :archive
+        post :send_reply
       end
 
       collection do

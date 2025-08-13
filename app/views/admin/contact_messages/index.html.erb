@@ -24,7 +24,8 @@
       <%= form.text_field :search,
           value: params[:search],
           placeholder: "Search messages...",
-          class: "form-input w-full" %>
+          class: "form-input w-full",
+          onkeypress: "if(event.key==='Enter'){this.form.submit();}" %>
     </div>
 
     <div>
@@ -40,8 +41,8 @@
           { class: "form-select" } %>
     </div>
 
-    <div>
-      <%= form.submit "Filter", class: "btn btn-primary" %>
+    <div class="flex gap-2">
+      <%= form.submit "Search & Filter", class: "btn btn-primary" %>
       <%= link_to "Clear", admin_contact_messages_path, class: "btn btn-outline-secondary" %>
     </div>
   <% end %>
@@ -49,7 +50,7 @@
 
 <!-- Bulk Actions -->
 <% if @contact_messages.any? %>
-  <%= form_with url: bulk_action_admin_contact_messages_path, method: :post, local: true, class: "mb-4" do |form| %>
+  <%= form_with url: bulk_action_admin_contact_messages_path, method: :post, local: true, class: "mb-4", id: "bulk-action-form" do |form| %>
     <div class="bg-white rounded-lg shadow-sm p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
@@ -60,17 +61,18 @@
 
           <%= form.select :bulk_action,
               options_for_select([
+                ['Mark as Pending', 'mark_as_pending'],
                 ['Mark as Read', 'mark_as_read'],
                 ['Mark as Replied', 'mark_as_replied'],
                 ['Archive', 'archive'],
                 ['Delete', 'delete']
               ]),
               { prompt: 'Choose action...' },
-              { class: "form-select" } %>
+              { class: "form-select", required: true } %>
         </div>
 
-        <%= form.submit "Apply", class: "btn btn-primary",
-            onclick: "return confirm('Are you sure you want to apply this action to selected messages?')" %>
+        <%= form.submit "Apply", class: "btn btn-primary", id: "bulk-apply-btn",
+            data: { "turbo-confirm": "Are you sure you want to apply this action to selected messages?" } %>
       </div>
     </div>
   <% end %>
@@ -139,30 +141,46 @@
               </td>
 
               <td class="px-6 py-4">
-                <div class="text-sm text-gray-500 max-w-xs truncate">
+                <%= link_to admin_contact_message_path(message), class: "text-sm text-gray-500 hover:text-gray-700 max-w-xs truncate block transition-colors" do %>
                   <%= message.short_message(80) %>
-                </div>
+                <% end %>
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= time_ago_in_words(message.created_at) %> ago
               </td>
 
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                <%= link_to "View", admin_contact_message_path(message),
-                    class: "text-purple-600 hover:text-purple-900" %>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex flex-wrap gap-2">
+                  <%= link_to "View", admin_contact_message_path(message),
+                      class: "text-purple-600 hover:text-purple-900" %>
 
-                <% if message.pending? %>
-                  <%= link_to "Mark Read", mark_as_read_admin_contact_message_path(message),
-                      method: :patch, class: "text-blue-600 hover:text-blue-900" %>
-                <% elsif message.read? %>
-                  <%= link_to "Mark Replied", mark_as_replied_admin_contact_message_path(message),
-                      method: :patch, class: "text-green-600 hover:text-green-900" %>
-                <% end %>
+                  <!-- Status change actions -->
+                  <% unless message.pending? %>
+                    <%= form_with url: mark_as_pending_admin_contact_message_path(message), method: :patch, local: true, style: "display: inline;" do |form| %>
+                      <%= form.submit "Mark Pending", class: "text-orange-600 hover:text-orange-900 bg-transparent border-none cursor-pointer underline text-sm" %>
+                    <% end %>
+                  <% end %>
 
-                <%= link_to "Delete", admin_contact_message_path(message),
-                    method: :delete, class: "text-red-600 hover:text-red-900",
-                    confirm: "Are you sure you want to delete this message?" %>
+                  <% unless message.read? %>
+                    <%= form_with url: mark_as_read_admin_contact_message_path(message), method: :patch, local: true, style: "display: inline;" do |form| %>
+                      <%= form.submit "Mark Read", class: "text-blue-600 hover:text-blue-900 bg-transparent border-none cursor-pointer underline text-sm" %>
+                    <% end %>
+                  <% end %>
+
+                  <% unless message.replied? %>
+                    <%= form_with url: mark_as_replied_admin_contact_message_path(message), method: :patch, local: true, style: "display: inline;" do |form| %>
+                      <%= form.submit "Mark Replied", class: "text-green-600 hover:text-green-900 bg-transparent border-none cursor-pointer underline text-sm" %>
+                    <% end %>
+                  <% end %>
+
+                  <%= link_to "Delete", admin_contact_message_path(message),
+                      data: {
+                        "turbo-method": :delete,
+                        "turbo-confirm": "Are you sure you want to delete this message?"
+                      },
+                      class: "text-red-600 hover:text-red-900" %>
+                </div>
               </td>
             </tr>
           <% end %>
@@ -193,26 +211,81 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle select all functionality
   const selectAllCheckbox = document.getElementById('select-all');
   const messageCheckboxes = document.querySelectorAll('.message-checkbox');
+  const bulkForm = document.getElementById('bulk-action-form');
+  const bulkApplyBtn = document.getElementById('bulk-apply-btn');
 
   if (selectAllCheckbox) {
     selectAllCheckbox.addEventListener('change', function() {
       messageCheckboxes.forEach(checkbox => {
         checkbox.checked = this.checked;
       });
+      updateBulkActionState();
     });
   }
 
   // Update select all when individual checkboxes change
   messageCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', function() {
-      const checkedCount = document.querySelectorAll('.message-checkbox:checked').length;
-      const totalCount = messageCheckboxes.length;
-
-      if (selectAllCheckbox) {
-        selectAllCheckbox.checked = checkedCount === totalCount;
-        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
-      }
+      updateSelectAllState();
+      updateBulkActionState();
     });
   });
+
+  // Handle bulk action form submission
+  if (bulkForm) {
+    bulkForm.addEventListener('submit', function(e) {
+      const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
+      const actionSelect = document.querySelector('#bulk_action');
+
+      if (checkedBoxes.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one message.');
+        return false;
+      }
+
+      if (!actionSelect.value) {
+        e.preventDefault();
+        alert('Please choose an action.');
+        return false;
+      }
+
+      // Add selected message IDs to the form
+      const existingInputs = bulkForm.querySelectorAll('input[name="message_ids[]"]');
+      existingInputs.forEach(input => input.remove());
+
+      checkedBoxes.forEach(checkbox => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'message_ids[]';
+        input.value = checkbox.value;
+        bulkForm.appendChild(input);
+      });
+    });
+  }
+
+  function updateSelectAllState() {
+    const checkedCount = document.querySelectorAll('.message-checkbox:checked').length;
+    const totalCount = messageCheckboxes.length;
+
+    if (selectAllCheckbox) {
+      selectAllCheckbox.checked = checkedCount === totalCount;
+      selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+    }
+  }
+
+  function updateBulkActionState() {
+    const checkedCount = document.querySelectorAll('.message-checkbox:checked').length;
+    if (bulkApplyBtn) {
+      bulkApplyBtn.disabled = checkedCount === 0;
+      if (checkedCount === 0) {
+        bulkApplyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        bulkApplyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+  }
+
+  // Initialize the state
+  updateBulkActionState();
 });
 </script>

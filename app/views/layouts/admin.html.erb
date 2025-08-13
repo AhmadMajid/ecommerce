@@ -113,6 +113,20 @@
             Categories
           <% end %>
 
+          <!-- Contact Messages -->
+          <%= link_to admin_contact_messages_path,
+              class: "flex items-center px-3 py-2 text-sm font-medium rounded-md #{controller_name == 'contact_messages' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-100'}" do %>
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Contact Messages
+            <% if defined?(ContactMessage) && (pending_count = ContactMessage.where(status: 'pending').count) > 0 %>
+              <span class="ml-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                <%= pending_count %>
+              </span>
+            <% end %>
+          <% end %>
+
           <!-- Orders (placeholder for future) -->
           <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-400 cursor-not-allowed">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

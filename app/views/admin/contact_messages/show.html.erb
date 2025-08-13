@@ -141,18 +141,48 @@
 
         <div class="flex justify-between items-center">
           <p class="text-sm text-gray-500">
-            This will open your default email client with a pre-filled message to
-            <strong><%= email_address %></strong>
+            Send via email client or directly from Rails
           </p>
 
           <div class="flex space-x-2">
             <button type="button" onclick="copyReply()" class="btn btn-outline-secondary">
               Copy Reply
             </button>
-            <a href="<%= mailto_url %>" class="btn btn-primary">
+            <button type="button" onclick="openEmailClient()" class="btn btn-outline-primary">
               Open Email Client
-            </a>
+            </button>
+            <button type="button" onclick="sendViaRails()" class="btn btn-primary">
+              Send via Rails
+            </button>
           </div>
+        </div>
+
+        <!-- Rails Email Form (hidden by default) -->
+        <div id="rails-email-form" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <%= form_with url: send_reply_admin_contact_message_path(@contact_message),
+                        method: :post,
+                        local: true,
+                        class: "space-y-4" do |form| %>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Your Email Address</label>
+              <%= form.email_field :admin_email,
+                                  placeholder: "admin@yourstore.com",
+                                  class: "form-input w-full",
+                                  value: "admin@yourstore.com" %>
+              <p class="text-xs text-gray-500 mt-1">This will be the 'from' address for the email</p>
+            </div>
+
+            <%= form.hidden_field :reply_content, id: "rails-reply-content" %>
+
+            <div class="flex justify-between">
+              <button type="button" onclick="cancelRailsEmail()" class="btn btn-outline-secondary">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-success">
+                Send Email Now
+              </button>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
@@ -242,22 +272,68 @@ function insertTemplate(templateName) {
   }
 }
 
+function sendViaRails() {
+  const textarea = document.getElementById('reply-textarea');
+  const messageBody = textarea ? textarea.value.trim() : '';
+
+  if (!messageBody) {
+    alert('Please enter a reply message first');
+    return;
+  }
+
+  // Show the Rails email form
+  const form = document.getElementById('rails-email-form');
+  const hiddenField = document.getElementById('rails-reply-content');
+
+  hiddenField.value = messageBody;
+  form.classList.remove('hidden');
+
+  // Scroll to the form
+  form.scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelRailsEmail() {
+  const form = document.getElementById('rails-email-form');
+  form.classList.add('hidden');
+}
+
+function openEmailClient() {
+  const textarea = document.getElementById('reply-textarea');
+  const messageBody = textarea ? textarea.value.trim() : '';
+
+  const emailAddress = '<%= j(@contact_message&.email.to_s.strip.presence || '') %>';
+  const subject = 'Re: <%= j((@contact_message&.subject || '').to_s.strip) %>';
+
+  // Construct mailto URL with body
+  let mailtoUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}`;
+
+  if (messageBody) {
+    mailtoUrl += `&body=${encodeURIComponent(messageBody)}`;
+  }
+
+  // Open the default email client
+  window.location.href = mailtoUrl;
+}
+
 function copyReply() {
   const textarea = document.getElementById('reply-textarea');
 
   if (textarea && textarea.value.trim()) {
     navigator.clipboard.writeText(textarea.value).then(function() {
       // Show success feedback
-      const button = event.target;
+      const button = document.querySelector('button[onclick="copyReply()"]');
       const originalText = button.textContent;
       button.textContent = 'Copied!';
       button.classList.add('btn-success');
+      button.classList.remove('btn-outline-secondary');
 
       setTimeout(() => {
         button.textContent = originalText;
         button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
       }, 2000);
     }).catch(function(err) {
+      console.error('Failed to copy to clipboard:', err);
       alert('Failed to copy reply to clipboard');
     });
   } else {

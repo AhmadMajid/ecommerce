@@ -14,12 +14,16 @@ class ContactMessage < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :unread, -> { where(status: 'pending') }
 
+  def mark_as_pending!
+    update!(status: 'pending', read_at: nil)
+  end
+
   def mark_as_read!
-    update!(status: 'read', read_at: Time.current) if pending?
+    update!(status: 'read', read_at: Time.current)
   end
 
   def mark_as_replied!
-    update!(status: 'replied') if read?
+    update!(status: 'replied')
   end
 
   def short_message(length = 100)

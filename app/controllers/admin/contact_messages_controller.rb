@@ -1,5 +1,5 @@
 class Admin::ContactMessagesController < Admin::BaseController
-  before_action :set_contact_message, only: [:show, :mark_as_read, :mark_as_replied, :archive, :destroy]
+  before_action :set_contact_message, only: [:show, :send_reply, :mark_as_pending, :mark_as_read, :mark_as_replied, :archive, :destroy]
 
   def index
     @contact_messages = ContactMessage.recent
@@ -25,6 +25,11 @@ class Admin::ContactMessagesController < Admin::BaseController
     @contact_message.mark_as_read! if @contact_message.pending?
   end
 
+  def mark_as_pending
+    @contact_message.mark_as_pending!
+    redirect_to admin_contact_messages_path, notice: 'Message marked as pending.'
+  end
+
   def mark_as_read
     @contact_message.mark_as_read!
     redirect_to admin_contact_messages_path, notice: 'Message marked as read.'
@@ -45,11 +50,30 @@ class Admin::ContactMessagesController < Admin::BaseController
     redirect_to admin_contact_messages_path, notice: 'Message deleted successfully.'
   end
 
+  def send_reply
+    reply_content = params[:reply_content]&.strip
+    admin_email = params[:admin_email]&.strip
+
+    if reply_content.blank?
+      redirect_to admin_contact_message_path(@contact_message), alert: 'Reply content cannot be blank.'
+      return
+    end
+
+    begin
+      AdminMailer.reply_to_contact_message(@contact_message, reply_content, admin_email).deliver_now
+      @contact_message.mark_as_replied!
+      redirect_to admin_contact_message_path(@contact_message), notice: 'Reply sent successfully!'
+    rescue => e
+      Rails.logger.error "Failed to send email: #{e.message}"
+      redirect_to admin_contact_message_path(@contact_message), alert: 'Failed to send email. Please check your email configuration.'
+    end
+  end
+
   def bulk_action
-    message_ids = params[:message_ids]
+    message_ids = params[:message_ids] || []
     action = params[:bulk_action]
 
-    if message_ids.blank? || message_ids.empty?
+    if message_ids.blank?
       redirect_to admin_contact_messages_path, alert: 'No messages selected.'
       return
     end
@@ -57,15 +81,18 @@ class Admin::ContactMessagesController < Admin::BaseController
     messages = ContactMessage.where(id: message_ids)
 
     case action
+    when 'mark_as_pending'
+      count = messages.update_all(status: 'pending', read_at: nil)
+      redirect_to admin_contact_messages_path, notice: "#{count} messages marked as pending."
     when 'mark_as_read'
-      messages.where(status: 'pending').update_all(status: 'read', read_at: Time.current)
-      redirect_to admin_contact_messages_path, notice: "#{messages.count} messages marked as read."
+      count = messages.update_all(status: 'read', read_at: Time.current)
+      redirect_to admin_contact_messages_path, notice: "#{count} messages marked as read."
     when 'mark_as_replied'
-      messages.where(status: 'read').update_all(status: 'replied')
-      redirect_to admin_contact_messages_path, notice: "#{messages.count} messages marked as replied."
+      count = messages.update_all(status: 'replied')
+      redirect_to admin_contact_messages_path, notice: "#{count} messages marked as replied."
     when 'archive'
-      messages.update_all(status: 'archived')
-      redirect_to admin_contact_messages_path, notice: "#{messages.count} messages archived."
+      count = messages.update_all(status: 'archived')
+      redirect_to admin_contact_messages_path, notice: "#{count} messages archived."
     when 'delete'
       count = messages.count
       messages.destroy_all
