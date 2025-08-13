@@ -2,7 +2,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["form", "quantityInput", "submitButton", "variantSelect", "priceDisplay"]
+  static targets = ["form", "quantityInput", "submitButton", "variantSelect", "priceDisplay", "quantityField"]
   static values = {
     productId: Number,
     variants: Array,
@@ -24,6 +24,11 @@ export default class extends Controller {
     } else if (quantity > maxQuantity) {
       this.quantityInputTarget.value = maxQuantity
       this.showNotification(`Only ${maxQuantity} items available in stock`, "warning")
+    }
+
+    // Update hidden field
+    if (this.hasQuantityFieldTarget) {
+      this.quantityFieldTarget.value = this.quantityInputTarget.value
     }
 
     this.updateAvailability()
@@ -75,13 +80,20 @@ export default class extends Controller {
         formData.append('variant_id', this.variantSelectTarget.value)
       }
 
+      const csrfTokenElement = document.querySelector('[name="csrf-token"]')
+      const headers = {
+        'Accept': 'application/json'
+      }
+
+      // Only include CSRF token if it exists
+      if (csrfTokenElement) {
+        headers['X-CSRF-Token'] = csrfTokenElement.content
+      }
+
       const response = await fetch('/cart_items', {
         method: 'POST',
         body: formData,
-        headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
-        }
+        headers: headers
       })
 
       const data = await response.json()
@@ -192,9 +204,13 @@ export default class extends Controller {
   }
 
   showNotification(message, type = "info") {
+    // Remove any existing notifications to prevent duplicates
+    const existingNotifications = document.querySelectorAll('.notification-toast')
+    existingNotifications.forEach(notification => notification.remove())
+
     // Create notification element
     const notification = document.createElement('div')
-    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`
+    notification.className = `notification-toast fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`
 
     // Style based on type
     switch(type) {
@@ -231,14 +247,115 @@ export default class extends Controller {
 
     // Auto remove after 5 seconds
     setTimeout(() => {
-      notification.classList.add("translate-x-full")
-      setTimeout(() => notification.remove(), 300)
+      if (notification.parentElement) {
+        notification.classList.add("translate-x-full")
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.remove()
+          }
+        }, 300)
+      }
     }, 5000)
   }
 
   updateCartCount(count) {
     const cartCountElements = document.querySelectorAll('[data-cart-count]')
     cartCountElements.forEach(element => {
+      element.textContent = count
+      if (count > 0) {
+        element.classList.remove('hidden')
+      }
+    })
+  }
+
+  async addToWishlist(event) {
+    event.preventDefault()
+
+    const button = event.currentTarget
+    const productId = button.dataset.productId
+    const csrfTokenElement = document.querySelector('meta[name="csrf-token"]')
+    const csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : null
+
+    // Prevent duplicate requests
+    if (button.disabled) return
+    button.disabled = true
+
+    try {
+      // Check if item is already in wishlist (by checking if heart is filled)
+      const svg = button.querySelector('svg')
+      const isInWishlist = svg.getAttribute('fill') === 'currentColor'
+
+      let response, endpoint, method
+
+      if (isInWishlist) {
+        // Remove from wishlist
+        endpoint = `/wishlists/remove/${productId}`
+        method = 'DELETE'
+      } else {
+        // Add to wishlist
+        endpoint = `/wishlists/add/${productId}`
+        method = 'POST'
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+
+      // Only include CSRF token if it exists
+      if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken
+      }
+
+      response = await fetch(endpoint, {
+        method: method,
+        headers: headers
+      })
+
+      const data = await response.json()
+
+      if (data.status === 'success') {
+        this.showNotification(data.message, 'success')
+        this.updateWishlistCount(data.wishlist_count)
+
+        // Toggle button state
+        if (isInWishlist) {
+          // Was in wishlist, now removed - show empty heart
+          button.classList.remove('wishlist-active')
+          svg.setAttribute('fill', 'none')
+          svg.setAttribute('stroke', 'currentColor')
+          svg.setAttribute('stroke-width', '2')
+        } else {
+          // Was not in wishlist, now added - show filled red heart
+          button.classList.add('wishlist-active')
+          svg.setAttribute('fill', 'currentColor')
+          svg.setAttribute('stroke', 'none')
+          svg.removeAttribute('stroke-width')
+        }
+      } else if (data.status === 'already_exists') {
+        // If already exists, treat as if it's now in wishlist
+        button.classList.add('wishlist-active')
+        svg.setAttribute('fill', 'currentColor')
+        svg.setAttribute('stroke', 'none')
+        svg.removeAttribute('stroke-width')
+        this.showNotification(data.message, 'info')
+      } else {
+        this.showNotification(data.message, 'error')
+      }
+    } catch (error) {
+      console.error('Error with wishlist operation:', error)
+      this.showNotification('Failed to update wishlist', 'error')
+    } finally {
+      // Re-enable button after a short delay to prevent rapid clicking
+      setTimeout(() => {
+        button.disabled = false
+      }, 500)
+    }
+  }
+
+  updateWishlistCount(count) {
+    const wishlistCountElements = document.querySelectorAll('[data-wishlist-count]')
+    wishlistCountElements.forEach(element => {
       element.textContent = count
       if (count > 0) {
         element.classList.remove('hidden')

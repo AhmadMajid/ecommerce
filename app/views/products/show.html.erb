@@ -92,14 +92,21 @@
 
         <!-- Rating (placeholder) -->
         <div class="flex items-center space-x-2 mb-4">
-          <div class="rating-stars">
+          <div class="rating-stars flex items-center space-x-1">
             <% 5.times do |i| %>
-              <svg class="rating-star-empty w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 <%= @product.average_rating > i ? 'text-yellow-400' : 'text-gray-300' %>"
+                   fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
               </svg>
             <% end %>
           </div>
-          <span class="text-sm text-gray-600">(0 reviews)</span>
+          <span class="text-sm text-gray-600">
+            <% if @product.reviews_count > 0 %>
+              <%= @product.average_rating %> (<%= pluralize(@product.reviews_count, 'review') %>)
+            <% else %>
+              (0 reviews)
+            <% end %>
+          </span>
         </div>
       </div>
 
@@ -110,9 +117,8 @@
 
           <% if @product.compare_at_price && @product.compare_at_price > @product.price %>
             <span class="text-lg text-gray-500 line-through">$<%= @product.compare_at_price %></span>
-            <% discount_percent = ((@product.compare_at_price - @product.price) / @product.compare_at_price * 100).round %>
             <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-medium">
-              Save <%= discount_percent %>%
+              Save <%= @product.sale_percentage.round %>%
             </span>
           <% end %>
         </div>
@@ -189,7 +195,7 @@
                 action: "submit->add-to-cart#submit"
               } do |form| %>
             <%= form.hidden_field :product_id, value: @product.id %>
-            <%= form.hidden_field :quantity, value: 1 %>
+            <%= form.hidden_field :quantity, value: 1, data: { add_to_cart_target: "quantityField" } %>
 
             <div class="flex space-x-4">
               <button type="submit"
@@ -201,12 +207,20 @@
                 Add to Cart
               </button>
 
+              <%
+                # Check if product is already in user's wishlist
+                in_wishlist = user_signed_in? && current_user.wishlists.exists?(product: @product)
+                button_classes = in_wishlist ? "btn btn-outline-primary btn-lg wishlist-active" : "btn btn-outline-primary btn-lg"
+                svg_fill = in_wishlist ? "currentColor" : "none"
+                svg_stroke = in_wishlist ? "none" : "currentColor"
+                svg_stroke_width = in_wishlist ? "" : "stroke-width=\"2\""
+              %>
               <button type="button"
-                      class="btn btn-outline-primary btn-lg"
+                      class="<%= button_classes %>"
                       data-action="click->add-to-cart#addToWishlist"
                       data-product-id="<%= @product.id %>">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                <svg class="w-5 h-5 text-red-500" fill="<%= svg_fill %>" stroke="<%= svg_stroke %>" viewBox="0 0 24 24" <%= svg_stroke_width %>>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                 </svg>
               </button>
             </div>
@@ -226,24 +240,10 @@
         <h3 class="text-lg font-medium text-gray-900 mb-4">Product Details</h3>
 
         <dl class="space-y-2">
-          <% if @product.sku.present? %>
-            <div class="flex">
-              <dt class="text-sm font-medium text-gray-500 w-24">SKU:</dt>
-              <dd class="text-sm text-gray-900"><%= @product.sku %></dd>
-            </div>
-          <% end %>
-
           <% if @product.category.present? %>
             <div class="flex">
               <dt class="text-sm font-medium text-gray-500 w-24">Category:</dt>
               <dd class="text-sm text-gray-900"><%= @product.category.name %></dd>
-            </div>
-          <% end %>
-
-          <% if @product.weight.present? %>
-            <div class="flex">
-              <dt class="text-sm font-medium text-gray-500 w-24">Weight:</dt>
-              <dd class="text-sm text-gray-900"><%= @product.weight %> lbs</dd>
             </div>
           <% end %>
 
@@ -274,7 +274,7 @@
                 data-action="click->tabs#switch"
                 data-tab="reviews"
                 data-tabs-target="tab">
-          Reviews (0)
+          Reviews (<%= @product.reviews_count %>)
         </button>
         <button class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
                 data-action="click->tabs#switch"
@@ -305,14 +305,127 @@
            data-tab="reviews"
            data-tabs-target="panel"
            aria-hidden="true">
-        <div class="text-center py-12">
-          <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-          </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
-          <p class="text-gray-500 mb-6">Be the first to share your thoughts about this product!</p>
-          <button class="btn btn-primary">Write a Review</button>
-        </div>
+        <% if @product.reviews.any? %>
+          <div class="space-y-6">
+            <!-- Reviews Summary -->
+            <div class="flex items-center justify-between border-b pb-4">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">Customer Reviews</h3>
+                <div class="flex items-center space-x-2 mt-1">
+                  <div class="flex items-center">
+                    <% 5.times do |i| %>
+                      <svg class="w-4 h-4 <%= @product.average_rating > i ? 'text-yellow-400' : 'text-gray-300' %>"
+                           fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <span class="text-sm text-gray-600">
+                    <%= @product.average_rating %> out of 5 (<%= pluralize(@product.reviews_count, 'review') %>)
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <% if user_signed_in? %>
+                  <% user_review = current_user_review_for(@product) %>
+                  <% if user_review %>
+                    <div class="flex items-center space-x-2">
+                      <p class="text-green-600 font-medium text-sm">✓ You have already reviewed this product</p>
+                      <%= link_to edit_product_review_path(@product, user_review), class: "btn btn-outline-primary btn-sm" do %>
+                        Edit Your Review
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <%= link_to new_product_review_path(@product), class: "btn btn-primary btn-sm" do %>
+                      Write a Review
+                    <% end %>
+                  <% end %>
+                <% else %>
+                  <%= link_to new_user_session_path, class: "btn btn-primary btn-sm" do %>
+                    Sign in to Write a Review
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Individual Reviews -->
+            <div class="space-y-6">
+              <% @product.reviews.order(created_at: :desc).each do |review| %>
+                <div class="border-b border-gray-200 pb-6 last:border-b-0">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-2 mb-2">
+                        <div class="flex items-center">
+                          <% 5.times do |i| %>
+                            <svg class="w-4 h-4 <%= review.rating > i ? 'text-yellow-400' : 'text-gray-300' %>"
+                                 fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                          <% end %>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900"><%= review.title %></span>
+                      </div>
+
+                      <p class="text-gray-600 mb-2"><%= simple_format(review.content) %></p>
+
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>By <%= review.user.first_name || review.user.email.split('@').first %></span>
+                          <span>•</span>
+                          <span><%= review.created_at.strftime("%B %d, %Y") %></span>
+                        </div>
+
+                        <% if user_signed_in? && current_user == review.user %>
+                          <div class="flex items-center space-x-2">
+                            <%= link_to edit_product_review_path(@product, review),
+                                class: "text-indigo-600 hover:text-indigo-800 text-sm font-medium" do %>
+                              Edit
+                            <% end %>
+                            <%= link_to [@product, review],
+                                class: "text-red-600 hover:text-red-800 text-sm font-medium",
+                                data: {
+                                  turbo_method: :delete
+                                } do %>
+                              Delete
+                            <% end %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
+            <p class="text-gray-500 mb-6">Be the first to share your thoughts about this product!</p>
+            <% if user_signed_in? %>
+              <% user_review = current_user_review_for(@product) %>
+              <% if user_review %>
+                <div class="flex items-center justify-center space-x-2">
+                  <p class="text-green-600 font-medium">✓ You have already reviewed this product</p>
+                  <%= link_to edit_product_review_path(@product, user_review), class: "btn btn-outline-primary" do %>
+                    Edit Your Review
+                  <% end %>
+                </div>
+              <% else %>
+                <%= link_to new_product_review_path(@product), class: "btn btn-primary" do %>
+                  Write a Review
+                <% end %>
+              <% end %>
+            <% else %>
+              <%= link_to new_user_session_path, class: "btn btn-primary" do %>
+                Sign in to Write a Review
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
       </div>
 
       <!-- Specifications Tab -->
@@ -322,24 +435,10 @@
            aria-hidden="true">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <dl class="space-y-4">
-            <% if @product.sku.present? %>
-              <div class="flex">
-                <dt class="text-sm font-medium text-gray-500 w-32">SKU:</dt>
-                <dd class="text-sm text-gray-900"><%= @product.sku %></dd>
-              </div>
-            <% end %>
-
             <% if @product.category.present? %>
               <div class="flex">
                 <dt class="text-sm font-medium text-gray-500 w-32">Category:</dt>
                 <dd class="text-sm text-gray-900"><%= @product.category.name %></dd>
-              </div>
-            <% end %>
-
-            <% if @product.weight.present? %>
-              <div class="flex">
-                <dt class="text-sm font-medium text-gray-500 w-32">Weight:</dt>
-                <dd class="text-sm text-gray-900"><%= @product.weight %> lbs</dd>
               </div>
             <% end %>
 

@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     collection do
       get :search
     end
+    resources :reviews, only: [:new, :create, :edit, :update, :destroy]
   end
 
   resources :categories, only: [:index, :show], param: :slug
@@ -31,6 +32,14 @@ Rails.application.routes.draw do
   resources :cart_items, only: [:create, :update, :destroy] do
     collection do
       delete :clear
+    end
+  end
+
+  # Wishlist functionality
+  resources :wishlists, only: [:index] do
+    collection do
+      post 'add/:product_id', to: 'wishlists#create', as: 'add_product'
+      delete 'remove/:product_id', to: 'wishlists#destroy', as: 'remove_product'
     end
   end
 

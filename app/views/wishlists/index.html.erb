@@ -1,0 +1,123 @@
+<div class="wishlist-container max-w-4xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-8">My Wishlist</h1>
+
+  <% if @wishlists.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @wishlists.each do |wishlist| %>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <% if wishlist.product.images.any? %>
+            <%= image_tag wishlist.product.images.first, class: "w-full h-48 object-cover" %>
+          <% else %>
+            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+              <span class="text-gray-500">No image</span>
+            </div>
+          <% end %>
+
+          <div class="p-4">
+            <h3 class="font-semibold text-lg mb-2">
+              <%= link_to wishlist.product.name, product_path(wishlist.product), class: "text-gray-900 hover:text-indigo-600" %>
+            </h3>
+
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xl font-bold text-gray-900">
+                $<%= wishlist.product.price %>
+              </span>
+
+              <% if wishlist.product.compare_at_price && wishlist.product.compare_at_price > wishlist.product.price %>
+                <span class="text-sm line-through text-gray-500">
+                  $<%= wishlist.product.compare_at_price %>
+                </span>
+              <% end %>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <% if wishlist.product.stock_status == 'in_stock' %>
+                <form action="<%= cart_items_path %>" method="post" class="flex-1 mr-2">
+                  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                  <%= hidden_field_tag :product_id, wishlist.product.id %>
+                  <%= hidden_field_tag :quantity, 1 %>
+                  <button type="submit" class="btn btn-primary btn-sm w-full">
+                    Add to Cart
+                  </button>
+                </form>
+              <% else %>
+                <span class="text-red-600 text-sm font-medium">Out of Stock</span>
+              <% end %>
+
+              <div data-controller="add-to-cart">
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm ml-2 wishlist-active"
+                        data-action="click->add-to-cart#addToWishlist"
+                        data-product-id="<%= wishlist.product.id %>">
+                  <svg class="w-4 h-4 text-red-500" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
+      <p class="text-gray-500 mb-4">Start browsing to add products to your wishlist.</p>
+      <%= link_to "Browse Products", products_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+// Simple JavaScript for removing items from wishlist
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', async function(e) {
+    if (e.target.closest('[data-action="click->wishlist#removeFromWishlist"]')) {
+      e.preventDefault()
+
+      const button = e.target.closest('[data-action="click->wishlist#removeFromWishlist"]')
+      const productId = button.dataset.productId
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+
+      try {
+        const response = await fetch(`/wishlists/remove/${productId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+            'Accept': 'application/json'
+          }
+        })
+
+        const data = await response.json()
+
+        if (data.status === 'success') {
+          // Remove the wishlist item from the page
+          button.closest('.bg-white').remove()
+
+          // Show notification
+          const notification = document.createElement('div')
+          notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50'
+          notification.textContent = data.message
+          document.body.appendChild(notification)
+
+          setTimeout(() => {
+            notification.remove()
+          }, 3000)
+
+          // Check if wishlist is now empty
+          const remainingItems = document.querySelectorAll('.bg-white.rounded-lg.shadow-md')
+          if (remainingItems.length === 0) {
+            location.reload() // Reload to show empty state
+          }
+        }
+      } catch (error) {
+        console.error('Error removing from wishlist:', error)
+      }
+    }
+  })
+})
+</script>

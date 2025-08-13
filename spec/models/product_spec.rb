@@ -144,4 +144,81 @@ RSpec.describe Product, type: :model do
       end
     end
   end
+
+  describe 'associations' do
+    it { should have_many(:wishlists).dependent(:destroy) }
+    it { should have_many(:reviews).dependent(:destroy) }
+  end
+
+  describe 'review and rating methods' do
+    let!(:product) { create(:product, category: electronics_category) }
+    let!(:user1) { create(:user) }
+    let!(:user2) { create(:user) }
+    let!(:user3) { create(:user) }
+
+    context 'with reviews' do
+      before do
+        create(:review, product: product, user: user1, rating: 5)
+        create(:review, product: product, user: user2, rating: 3)
+        create(:review, product: product, user: user3, rating: 4)
+      end
+
+      describe '#average_rating' do
+        it 'calculates the correct average rating' do
+          expect(product.average_rating).to eq(4.0)
+        end
+
+        it 'rounds to one decimal place' do
+          create(:user).tap do |user4|
+            create(:review, product: product, user: user4, rating: 2)
+          end
+          product.reload
+          expect(product.average_rating).to eq(3.5)
+        end
+      end
+
+      describe '#reviews_count' do
+        it 'returns the correct number of reviews' do
+          expect(product.reviews_count).to eq(3)
+        end
+      end
+    end
+
+    context 'without reviews' do
+      describe '#average_rating' do
+        it 'returns 0 when no reviews exist' do
+          expect(product.average_rating).to eq(0)
+        end
+      end
+
+      describe '#reviews_count' do
+        it 'returns 0 when no reviews exist' do
+          expect(product.reviews_count).to eq(0)
+        end
+      end
+    end
+  end
+
+  describe 'sale percentage calculation' do
+    let!(:product) { create(:product, category: electronics_category) }
+
+    context 'with compare_at_price' do
+      it 'calculates correct sale percentage' do
+        product.update(price: 80.00, compare_at_price: 100.00)
+        expect(product.sale_percentage).to eq(20.0)
+      end
+
+      it 'rounds to two decimal places' do
+        product.update(price: 33.33, compare_at_price: 50.00)
+        expect(product.sale_percentage).to eq(33.34)
+      end
+    end
+
+    context 'without compare_at_price' do
+      it 'returns 0 when no compare_at_price' do
+        product.update(price: 80.00, compare_at_price: nil)
+        expect(product.sale_percentage).to eq(0)
+      end
+    end
+  end
 end

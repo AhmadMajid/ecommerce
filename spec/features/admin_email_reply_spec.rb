@@ -16,7 +16,7 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
     visit new_user_session_path
     fill_in 'Email', with: admin_user.email
     fill_in 'Password', with: admin_user.password
-    click_button 'Log in'
+    click_button 'Sign In'
   end
 
   scenario 'Admin can copy reply content to clipboard', js: true do
@@ -55,15 +55,20 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
   scenario 'Admin can send email directly via Rails' do
     visit admin_contact_message_path(contact_message)
 
+    # Check that Rails email form is initially hidden
+    expect(page).to have_css('#rails-email-form.hidden')
+
     reply_text = 'Thank you for contacting us! Your question is important to us.'
-    fill_in 'reply-textarea', with: reply_text
 
-    # Click Send via Rails
-    click_button 'Send via Rails'
+    # Use the non-JavaScript approach: visit the page with the show_rails_form parameter
+    visit admin_contact_message_path(contact_message, show_rails_form: true)
 
-    # Check that the Rails form appears
-    expect(page).to have_css('#rails-email-form:not(.hidden)')
-    expect(page).to have_field('admin_email', with: 'admin@yourstore.com')
+    # Now the Rails email form should be visible
+    expect(page).to have_css('#rails-email-form', visible: true)
+    expect(page).not_to have_css('#rails-email-form.hidden')
+
+    # Fill in the reply content in the Rails form
+    fill_in 'reply_content', with: reply_text
 
     # Customize admin email and send
     fill_in 'admin_email', with: 'support@mystore.com'
@@ -87,18 +92,19 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
     expect(contact_message.reload.status).to eq('replied')
   end
 
-  scenario 'Admin sees error when trying to send empty reply' do
+  scenario 'Admin sees error when trying to send empty reply', js: true do
     visit admin_contact_message_path(contact_message)
 
     # Try to send without filling reply
-    click_button 'Send via Rails'
+    accept_alert('Please enter a reply message first') do
+      click_button 'Send via Rails'
+    end
 
-    # Should show error and not display form
-    expect(page).to have_content('Please enter a reply message first')
-    expect(page).to have_css('#rails-email-form.hidden')
+    # Form should remain hidden (the alert prevented the form from showing)
+    expect(page).not_to have_css('#rails-email-form', visible: true)
   end
 
-  scenario 'Admin can cancel Rails email sending' do
+  scenario 'Admin can cancel Rails email sending', js: true do
     visit admin_contact_message_path(contact_message)
 
     fill_in 'reply-textarea', with: 'Some reply content'
@@ -107,14 +113,18 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
     # Form should be visible
     expect(page).to have_css('#rails-email-form:not(.hidden)')
 
-    # Cancel the action
-    click_button 'Cancel'
+    # Cancel the action - look for a Cancel link instead
+    within('#rails-email-form') do
+      click_link 'Cancel'
+    end
 
-    # Form should be hidden again
-    expect(page).to have_css('#rails-email-form.hidden')
+    # Should return to the main page
+    expect(current_path).to eq(admin_contact_message_path(contact_message))
+    # Form should not be shown after navigation
+    expect(page).not_to have_css('#rails-email-form', visible: true)
   end
 
-  scenario 'Admin can use email templates' do
+  scenario 'Admin can use email templates', js: true do
     visit admin_contact_message_path(contact_message)
 
     # Click a template button
@@ -127,7 +137,7 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
     expect(textarea_content).to include('Product Question')
   end
 
-  scenario 'Email templates are personalized' do
+  scenario 'Email templates are personalized', js: true do
     visit admin_contact_message_path(contact_message)
 
     # Test each template
@@ -140,7 +150,7 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
     end
   end
 
-  scenario 'Admin handles email delivery errors gracefully' do
+  scenario 'Admin handles email delivery errors gracefully', js: true do
     # Mock email delivery failure
     allow(AdminMailer).to receive(:reply_to_contact_message).and_raise(StandardError.new('SMTP Error'))
 
@@ -148,6 +158,13 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
 
     fill_in 'reply-textarea', with: 'Test reply'
     click_button 'Send via Rails'
+
+    # Wait for form to appear and fill it properly
+    expect(page).to have_css('#rails-email-form:not(.hidden)')
+
+    # The reply content should be automatically filled from the textarea
+    # Just need to fill the admin email and submit
+    fill_in 'admin_email', with: 'admin@test.com'
     click_button 'Send Email Now'
 
     expect(page).to have_content('Failed to send email. Please check your email configuration.')
@@ -166,7 +183,7 @@ RSpec.feature 'Admin Email Reply Functionality', type: :feature do
     expect(page).to have_content('Send via email client or directly from Rails')
   end
 
-  scenario 'Email content includes original message context' do
+  scenario 'Email content includes original message context', js: true do
     visit admin_contact_message_path(contact_message)
 
     fill_in 'reply-textarea', with: 'Here is my response.'

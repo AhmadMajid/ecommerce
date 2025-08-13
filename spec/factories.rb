@@ -1,4 +1,17 @@
 FactoryBot.define do
+  factory :review do
+    association :user
+    association :product
+    rating { rand(1..5) }
+    title { Faker::Lorem.sentence(word_count: 3) }
+    content { Faker::Lorem.paragraph(sentence_count: 3) }
+  end
+
+  factory :wishlist do
+    association :user
+    association :product
+  end
+
   factory :contact_message do
     name { Faker::Name.name }
     email { Faker::Internet.email }

@@ -6,6 +6,8 @@ class Product < ApplicationRecord
   has_many :product_variants, dependent: :destroy
   has_many :cart_items, dependent: :destroy
   has_many :order_items, dependent: :destroy
+  has_many :wishlists, dependent: :destroy
+  has_many :reviews, dependent: :destroy
 
   # Active Storage
   has_many_attached :images
@@ -119,12 +121,21 @@ class Product < ApplicationRecord
 
   def sale_percentage
     return 0 unless on_sale?
-    ((compare_at_price - price) / compare_at_price * 100).round
+    ((compare_at_price - price) / compare_at_price * 100).round(2)
   end
 
   def profit_margin_percentage
     return 0 if cost_price.blank? || cost_price.zero?
     ((price - cost_price) / price * 100).round(2)
+  end
+
+  def average_rating
+    return 0 if reviews.empty?
+    reviews.average(:rating).to_f.round(1)
+  end
+
+  def reviews_count
+    reviews.count
   end
 
   def primary_image

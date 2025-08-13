@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_141923) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_13_114027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -322,6 +322,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_141923) do
     t.index ["track_inventory", "inventory_quantity"], name: "index_products_on_track_inventory_and_inventory_quantity"
   end
 
+  create_table "reviews", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "rating"
+    t.string "title"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_reviews_on_product_id"
+    t.index ["user_id"], name: "index_reviews_on_user_id"
+  end
+
   create_table "shipping_methods", force: :cascade do |t|
     t.string "name", null: false
     t.text "description", null: false
@@ -380,6 +392,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_141923) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  create_table "wishlists", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_wishlists_on_product_id"
+    t.index ["user_id"], name: "index_wishlists_on_user_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addresses", "users"
@@ -397,4 +418,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_141923) do
   add_foreign_key "payments", "orders"
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
+  add_foreign_key "reviews", "products"
+  add_foreign_key "reviews", "users"
+  add_foreign_key "wishlists", "products"
+  add_foreign_key "wishlists", "users"
 end

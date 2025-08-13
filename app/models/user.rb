@@ -17,6 +17,9 @@ class User < ApplicationRecord
   # Associations
   has_many :addresses, dependent: :destroy
   has_many :carts, dependent: :destroy
+  has_many :wishlists, dependent: :destroy
+  has_many :wishlist_products, through: :wishlists, source: :product
+  has_many :reviews, dependent: :destroy
   # has_many :orders, dependent: :destroy # temporarily disabled
 
   # Helper methods for default addresses

@@ -23,6 +23,15 @@ class Admin::ContactMessagesController < Admin::BaseController
 
   def show
     @contact_message.mark_as_read! if @contact_message.pending?
+
+    # Set up navigation between messages
+    all_messages = ContactMessage.order(:created_at)
+    current_index = all_messages.find_index(@contact_message)
+
+    if current_index
+      @prev_message = current_index > 0 ? all_messages[current_index - 1] : nil
+      @next_message = current_index < all_messages.length - 1 ? all_messages[current_index + 1] : nil
+    end
   end
 
   def mark_as_pending

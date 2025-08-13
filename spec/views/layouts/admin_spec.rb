@@ -30,8 +30,8 @@ RSpec.describe 'Admin Layout with Contact Messages', type: :view do
     end
 
     context 'with no pending contact messages' do
-      let!(:read_messages) { create_list(:contact_message, :read, 2) }
-      let!(:replied_messages) { create_list(:contact_message, :replied, 1) }
+      let!(:read_messages) { create_list(:contact_message, 2, :read) }
+      let!(:replied_messages) { create_list(:contact_message, 1, :replied) }
 
       it 'displays contact messages link without badge' do
         render template: 'layouts/admin'
