@@ -45,7 +45,7 @@
       <div class="bg-white rounded-lg shadow-sm p-6">
 
         <!-- Search -->
-        <%= form_with url: @current_category ? category_path(@current_category) : products_path,
+        <%= form_with url: products_path,
             method: :get,
             local: true,
             class: "space-y-6" do |form| %>
@@ -113,7 +113,7 @@
         <!-- Sort Options -->
         <div class="flex items-center space-x-4">
           <label class="text-sm font-medium text-gray-700">Sort by:</label>
-          <%= form_with url: @current_category ? category_path(@current_category) : products_path,
+          <%= form_with url: products_path,
               method: :get,
               local: true,
               data: { remote: true },
