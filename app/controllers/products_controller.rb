@@ -40,6 +40,16 @@ class ProductsController < ApplicationController
       @products = @products.order(created_at: :desc)
     when 'featured'
       @products = @products.order(featured: :desc, created_at: :desc)
+    when 'rating_high'
+      # Sort by average rating (highest first), then by review count
+      @products = @products.left_joins(:reviews)
+                          .group('products.id')
+                          .order(Arel.sql('AVG(COALESCE(reviews.rating, 0)) DESC, COUNT(reviews.id) DESC'))
+    when 'rating_low'
+      # Sort by average rating (lowest first), then by review count
+      @products = @products.left_joins(:reviews)
+                          .group('products.id')
+                          .order(Arel.sql('AVG(COALESCE(reviews.rating, 0)) ASC, COUNT(reviews.id) ASC'))
     else
       @products = @products.order(featured: :desc, created_at: :desc)
     end

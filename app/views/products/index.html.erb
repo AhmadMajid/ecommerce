@@ -62,8 +62,8 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
             <%= form.select :category_id,
-                options_from_collection_for_select(@categories.roots, :id, :name, params[:category_id]),
-                { prompt: 'All Categories' },
+                options_for_select([['All Categories', '']] + simple_hierarchical_category_options, params[:category_id]),
+                {},
                 { class: "form-select w-full" } %>
           </div>
 
@@ -123,6 +123,8 @@
                   ['Default', ''],
                   ['Price: Low to High', 'price_low'],
                   ['Price: High to Low', 'price_high'],
+                  ['Rating: High to Low', 'rating_high'],
+                  ['Rating: Low to High', 'rating_low'],
                   ['Name A-Z', 'name'],
                   ['Newest First', 'newest'],
                   ['Featured', 'featured']

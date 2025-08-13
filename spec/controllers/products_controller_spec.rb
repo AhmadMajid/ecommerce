@@ -237,6 +237,56 @@ RSpec.describe ProductsController, type: :controller do
 
         expect(assigns(:products)).to include(iphone, macbook, shirt)
       end
+
+      context "rating sort" do
+        let!(:user1) { create(:user) }
+        let!(:user2) { create(:user) }
+        let!(:user3) { create(:user) }
+
+        before do
+          # Create reviews for testing rating sort
+          # iPhone: 4.5 average (4 + 5) / 2 = 4.5
+          create(:review, product: iphone, user: user1, rating: 4)
+          create(:review, product: iphone, user: user2, rating: 5)
+
+          # MacBook: 3.0 average (3)
+          create(:review, product: macbook, user: user1, rating: 3)
+
+          # Shirt: 5.0 average (5)
+          create(:review, product: shirt, user: user1, rating: 5)
+        end
+
+        it "sorts by rating high to low" do
+          get :index, params: { sort: "rating_high" }
+
+          products = assigns(:products).to_a
+          # Order should be: Shirt (5.0), iPhone (4.5), MacBook (3.0)
+          expect(products.index(shirt)).to be < products.index(iphone)
+          expect(products.index(iphone)).to be < products.index(macbook)
+        end
+
+        it "sorts by rating low to high" do
+          get :index, params: { sort: "rating_low" }
+
+          products = assigns(:products).to_a
+          # Order should be: MacBook (3.0), iPhone (4.5), Shirt (5.0)
+          expect(products.index(macbook)).to be < products.index(iphone)
+          expect(products.index(iphone)).to be < products.index(shirt)
+        end
+
+        it "handles products with no reviews correctly" do
+          # Create a product with no reviews
+          unreviewed_product = create(:product, name: "Unreviewed", category: electronics_category, price: 100)
+
+          get :index, params: { sort: "rating_high" }
+
+          products = assigns(:products).to_a
+          # Products with reviews should come before products without reviews
+          expect(products.index(shirt)).to be < products.index(unreviewed_product)
+          expect(products.index(iphone)).to be < products.index(unreviewed_product)
+          expect(products.index(macbook)).to be < products.index(unreviewed_product)
+        end
+      end
     end
 
     context "performance and optimization" do
