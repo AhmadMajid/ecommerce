@@ -105,6 +105,114 @@ RSpec.describe 'Admin Contact Messages Management', type: :request do
       end
     end
 
+    describe 'POST /admin/contact_messages/:id/send_reply' do
+      let(:contact_message) { create(:contact_message) }
+      let(:reply_content) { 'Thank you for your inquiry!' }
+      let(:admin_email) { 'admin@test.com' }
+
+      before do
+        # Clear any existing deliveries
+        ActionMailer::Base.deliveries.clear
+      end
+
+      it 'sends email reply successfully' do
+        expect {
+          post send_reply_admin_contact_message_path(contact_message), params: {
+            reply_content: reply_content,
+            admin_email: admin_email
+          }
+        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+
+        expect(response).to redirect_to(admin_contact_message_path(contact_message))
+        expect(flash[:notice]).to eq('Reply sent successfully!')
+
+        contact_message.reload
+        expect(contact_message.status).to eq('replied')
+      end
+
+      it 'includes reply content in email' do
+        post send_reply_admin_contact_message_path(contact_message), params: {
+          reply_content: reply_content,
+          admin_email: admin_email
+        }
+
+        email = ActionMailer::Base.deliveries.last
+        expect(email.to).to include(contact_message.email)
+        expect(email.from).to include(admin_email)
+        expect(email.subject).to eq("Re: #{contact_message.subject}")
+        expect(email.body.encoded).to include(reply_content)
+      end
+
+      it 'handles blank reply content' do
+        post send_reply_admin_contact_message_path(contact_message), params: {
+          reply_content: '',
+          admin_email: admin_email
+        }
+
+        expect(response).to redirect_to(admin_contact_message_path(contact_message))
+        expect(flash[:alert]).to eq('Reply content cannot be blank.')
+        expect(ActionMailer::Base.deliveries).to be_empty
+      end
+
+      it 'handles email delivery errors gracefully' do
+        allow(AdminMailer).to receive(:reply_to_contact_message).and_raise(StandardError.new('SMTP Error'))
+
+        post send_reply_admin_contact_message_path(contact_message), params: {
+          reply_content: reply_content,
+          admin_email: admin_email
+        }
+
+        expect(response).to redirect_to(admin_contact_message_path(contact_message))
+        expect(flash[:alert]).to eq('Failed to send email. Please check your email configuration.')
+      end
+
+      it 'uses default admin email when not provided' do
+        post send_reply_admin_contact_message_path(contact_message), params: {
+          reply_content: reply_content
+        }
+
+        email = ActionMailer::Base.deliveries.last
+        expect(email.from).to include('admin@yourstore.com')
+      end
+    end
+
+    describe 'PATCH /admin/contact_messages/:id/mark_as_pending' do
+      let(:contact_message) { create(:contact_message, :read) }
+
+      it 'marks message as pending' do
+        patch mark_as_pending_admin_contact_message_path(contact_message)
+
+        expect(response).to redirect_to(admin_contact_messages_path)
+        expect(flash[:notice]).to eq('Message marked as pending.')
+
+        contact_message.reload
+        expect(contact_message.status).to eq('pending')
+      end
+    end
+
+    describe 'POST /admin/contact_messages/bulk_action with enhanced actions' do
+      let!(:messages) { create_list(:contact_message, 3) }
+      let(:message_ids) { messages.map(&:id) }
+
+      it 'handles mark_as_pending bulk action' do
+        # Mark messages as read first
+        messages.each { |msg| msg.update!(status: 'read') }
+
+        post bulk_action_admin_contact_messages_path, params: {
+          bulk_action: 'mark_as_pending',
+          message_ids: message_ids
+        }
+
+        expect(response).to redirect_to(admin_contact_messages_path)
+        expect(flash[:notice]).to include('messages marked as pending')
+
+        messages.each do |message|
+          message.reload
+          expect(message.status).to eq('pending')
+        end
+      end
+    end
+
     describe 'DELETE /admin/contact_messages/:id' do
       let!(:contact_message) { create(:contact_message) }
 

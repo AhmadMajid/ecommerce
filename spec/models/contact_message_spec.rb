@@ -205,6 +205,83 @@ RSpec.describe ContactMessage, type: :model do
     end
   end
 
+  describe 'enhanced status management' do
+    describe '#mark_as_pending!' do
+      it 'marks read message as pending' do
+        contact_message = create(:contact_message, :read)
+        contact_message.mark_as_pending!
+
+        expect(contact_message.reload.status).to eq('pending')
+        expect(contact_message.read_at).to be_nil
+      end
+
+      it 'marks replied message as pending' do
+        contact_message = create(:contact_message, :replied)
+        contact_message.mark_as_pending!
+
+        expect(contact_message.reload.status).to eq('pending')
+        expect(contact_message.read_at).to be_nil
+      end
+
+      it 'marks archived message as pending' do
+        contact_message = create(:contact_message, :archived)
+        contact_message.mark_as_pending!
+
+        expect(contact_message.reload.status).to eq('pending')
+        expect(contact_message.read_at).to be_nil
+      end
+    end
+
+    describe '#mark_as_read!' do
+      it 'marks pending message as read and sets read_at' do
+        contact_message = create(:contact_message, status: 'pending')
+        contact_message.mark_as_read!
+
+        expect(contact_message.reload.status).to eq('read')
+        expect(contact_message.read_at).to be_present
+      end
+
+      it 'can mark replied message as read' do
+        contact_message = create(:contact_message, :replied)
+        contact_message.mark_as_read!
+
+        expect(contact_message.reload.status).to eq('read')
+        expect(contact_message.read_at).to be_present
+      end
+
+      it 'can mark archived message as read' do
+        contact_message = create(:contact_message, :archived)
+        contact_message.mark_as_read!
+
+        expect(contact_message.reload.status).to eq('read')
+        expect(contact_message.read_at).to be_present
+      end
+    end
+
+    describe '#mark_as_replied!' do
+      it 'marks pending message as replied' do
+        contact_message = create(:contact_message, status: 'pending')
+        contact_message.mark_as_replied!
+
+        expect(contact_message.reload.status).to eq('replied')
+      end
+
+      it 'marks read message as replied' do
+        contact_message = create(:contact_message, :read)
+        contact_message.mark_as_replied!
+
+        expect(contact_message.reload.status).to eq('replied')
+      end
+
+      it 'can mark archived message as replied' do
+        contact_message = create(:contact_message, :archived)
+        contact_message.mark_as_replied!
+
+        expect(contact_message.reload.status).to eq('replied')
+      end
+    end
+  end
+
   describe '#short_message' do
     let(:short_message_text) { 'This is a short message.' }
     let(:long_message_text) { 'This is a very long message that exceeds the default length limit and should be truncated with ellipsis at the end to indicate that there is more content available.' }
