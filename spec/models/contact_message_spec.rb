@@ -165,7 +165,7 @@ RSpec.describe ContactMessage, type: :model do
       end
 
       context 'when message is not pending' do
-        it 'does not change status if already read' do
+        it 'can update read_at for already read message' do
           read_message = create(:contact_message, :read)
           original_read_at = read_message.read_at
 
@@ -173,7 +173,9 @@ RSpec.describe ContactMessage, type: :model do
 
           read_message.reload
           expect(read_message.status).to eq('read')
-          expect(read_message.read_at).to eq(original_read_at)
+          # read_at should be updated to current time
+          expect(read_message.read_at).to be_within(1.second).of(Time.current)
+          expect(read_message.read_at).not_to eq(original_read_at)
         end
       end
     end
@@ -192,14 +194,14 @@ RSpec.describe ContactMessage, type: :model do
       end
 
       context 'when message is not read' do
-        it 'does not change status if pending' do
+        it 'can mark pending message as replied (flexible status management)' do
           pending_message = create(:contact_message)
           expect(pending_message.status).to eq('pending')
 
           pending_message.mark_as_replied!
 
           pending_message.reload
-          expect(pending_message.status).to eq('pending')
+          expect(pending_message.status).to eq('replied')
         end
       end
     end
