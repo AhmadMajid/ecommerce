@@ -262,18 +262,15 @@
 
               <!-- Quick Add Button -->
               <% unless product.track_inventory? && product.stock_status == 'out_of_stock' %>
-                <%= form_with url: cart_items_path, method: :post,
-                    data: { controller: "cart", action: "submit->cart#addToCart" },
-                    class: "inline-block" do |form| %>
-                  <%= form.hidden_field :product_id, value: product.id %>
-                  <%= form.hidden_field :quantity, value: 1 %>
-                  <button type="submit"
-                          class="group/btn bg-gradient-to-r from-purple-600 to-blue-600 text-white p-2.5 lg:p-3 rounded-lg lg:rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                          title="Add to Cart">
+                              <!-- Quick Add Button -->
+                <%= form_with url: cart_items_path, local: false, class: "inline-block", data: { controller: "cart", cart_product_id_value: product.id, action: "submit->cart#addToCart" } do |f| %>
+                  <%= hidden_field_tag :product_id, product.id %>
+                  <%= hidden_field_tag :quantity, 1 %>
+                  <%= f.button type: "submit", class: "group/btn bg-gradient-to-r from-purple-600 to-blue-600 text-white p-2.5 lg:p-3 rounded-lg lg:rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105", title: "Add to Cart" do %>
                     <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
                     </svg>
-                  </button>
+                  <% end %>
                 <% end %>
               <% else %>
                 <span class="text-red-500 text-xs font-medium bg-red-50 px-2 py-1 rounded">Out of Stock</span>

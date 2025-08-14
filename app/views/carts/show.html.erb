@@ -1,6 +1,6 @@
 <% content_for :title, "Shopping Cart" %>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-controller="cart">
   <h1 class="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
   <% if @cart.empty? %>
@@ -71,9 +71,11 @@
                                value="<%= item.quantity %>"
                                min="1"
                                max="999"
-                               data-action="change->cart#updateQuantity"
+                               data-action="change->cart#updateQuantityFromInput blur->cart#updateQuantityFromInput"
                                data-cart-item-id="<%= item.id %>"
-                               class="w-16 text-center border border-gray-300 rounded-md py-1 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                               data-original-value="<%= item.quantity %>"
+                               style="-webkit-appearance: none; -moz-appearance: textfield;"
+                               class="w-16 text-center border border-gray-300 rounded-md py-1 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
 
                         <button type="button"
                                 data-action="click->cart#increaseQuantity"
@@ -158,9 +160,13 @@
               <% if @cart.coupon_code.present? %>
                 <div class="mt-2 flex items-center justify-between">
                   <span class="text-sm text-green-600">✓ Coupon "<%= @cart.coupon_code %>" applied</span>
-                  <%= link_to "Remove", cart_path(remove_coupon: true),
-                      method: :patch,
-                      class: "text-sm text-red-600 hover:text-red-800" %>
+                  <%= form_with url: cart_path, method: :patch, local: false,
+                      data: { action: "submit->cart#removeCoupon" },
+                      class: "inline" do |f| %>
+                    <%= f.hidden_field :remove_coupon, value: "true" %>
+                    <%= f.submit "Remove",
+                        class: "text-sm text-red-600 hover:text-red-800 bg-transparent border-none cursor-pointer underline" %>
+                  <% end %>
                 </div>
               <% end %>
             </div>
@@ -168,13 +174,13 @@
             <!-- Summary Details -->
             <div class="space-y-2 border-t border-gray-200 pt-4" id="cart-summary">
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Subtotal (<span data-item-count><%= @cart.item_count %></span> items)</span>
-                <span data-subtotal><%= number_to_currency(@cart.subtotal) %></span>
+                <span class="text-gray-600">Subtotal (<span data-cart-target="count"><%= @cart.item_count %></span> items)</span>
+                <span data-cart-target="subtotal"><%= number_to_currency(@cart.subtotal) %></span>
               </div>
 
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Shipping</span>
-                <span data-shipping>
+                <span data-cart-target="shipping">
                   <% if @cart.shipping_amount > 0 %>
                     <%= number_to_currency(@cart.shipping_amount) %>
                   <% else %>
@@ -185,19 +191,19 @@
 
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Tax</span>
-                <span data-tax><%= number_to_currency(@cart.tax_amount) %></span>
+                <span data-cart-target="tax"><%= number_to_currency(@cart.tax_amount) %></span>
               </div>
 
               <% if @cart.discount_amount > 0 %>
                 <div class="flex justify-between text-sm text-green-600">
                   <span>Discount</span>
-                  <span data-discount>-<%= number_to_currency(@cart.discount_amount) %></span>
+                  <span data-cart-target="discount">-<%= number_to_currency(@cart.discount_amount) %></span>
                 </div>
               <% end %>
 
               <div class="flex justify-between text-base font-medium text-gray-900 border-t border-gray-200 pt-2">
                 <span>Total</span>
-                <span data-total><%= number_to_currency(@cart.total) %></span>
+                <span data-cart-target="total"><%= number_to_currency(@cart.total) %></span>
               </div>
             </div>
 
