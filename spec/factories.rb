@@ -1,4 +1,17 @@
 FactoryBot.define do
+  factory :coupon do
+    code { "MyString" }
+    discount_type { "MyString" }
+    discount_value { "9.99" }
+    valid_from { "2025-08-13 19:07:24" }
+    valid_until { "2025-08-13 19:07:24" }
+    min_order_amount { "9.99" }
+    max_discount_amount { "9.99" }
+    usage_limit { 1 }
+    used_count { 1 }
+    active { false }
+  end
+
   factory :review do
     association :user
     association :product
