@@ -3,6 +3,7 @@ class Checkout < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :cart
   belongs_to :shipping_method, optional: true
+  belongs_to :coupon, optional: true
 
   # Enums
   enum :status, {
@@ -157,6 +158,28 @@ class Checkout < ApplicationRecord
     end
   end
 
+  def calculate_totals
+    return unless cart
+
+    self.subtotal = cart.subtotal
+    self.tax_amount = cart.tax_amount
+    self.discount_amount = cart.discount_amount
+
+    # Copy coupon information from cart
+    self.coupon_code = cart.coupon_code
+    self.coupon_id = cart.coupon_id
+
+    # Calculate shipping amount based on selected shipping method
+    if shipping_method.present?
+      cart_weight = cart.cart_items.sum { |item| (item.product.weight || 0) * item.quantity }
+      self.shipping_amount = shipping_method.calculate_cost(cart_weight, subtotal)
+    else
+      self.shipping_amount = 0
+    end
+
+    self.total_amount = subtotal + tax_amount + shipping_amount - discount_amount
+  end
+
   private
 
   def shipping_address_present
@@ -173,23 +196,5 @@ class Checkout < ApplicationRecord
 
   def set_expiry_date
     self.expires_at = 2.hours.from_now
-  end
-
-  def calculate_totals
-    return unless cart
-
-    self.subtotal = cart.subtotal
-    self.tax_amount = cart.tax_amount
-    self.discount_amount = cart.discount_amount
-
-    # Calculate shipping amount based on selected shipping method
-    if shipping_method.present?
-      cart_weight = cart.cart_items.sum { |item| (item.product.weight || 0) * item.quantity }
-      self.shipping_amount = shipping_method.calculate_cost(cart_weight, subtotal)
-    else
-      self.shipping_amount = 0
-    end
-
-    self.total_amount = subtotal + tax_amount + shipping_amount - discount_amount
   end
 end

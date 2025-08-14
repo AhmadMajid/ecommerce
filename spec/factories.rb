@@ -1,15 +1,32 @@
 FactoryBot.define do
   factory :coupon do
-    code { "MyString" }
-    discount_type { "MyString" }
-    discount_value { "9.99" }
-    valid_from { "2025-08-13 19:07:24" }
-    valid_until { "2025-08-13 19:07:24" }
-    min_order_amount { "9.99" }
-    max_discount_amount { "9.99" }
-    usage_limit { 1 }
-    used_count { 1 }
-    active { false }
+    sequence(:code) { |n| "SAVE#{n}" }
+    discount_type { "fixed" }
+    discount_value { 25.00 }
+    valid_from { 1.week.ago }
+    valid_until { 1.week.from_now }
+    min_order_amount { 0.00 }
+    max_discount_amount { nil }
+    usage_limit { 100 }
+    used_count { 0 }
+    active { true }
+
+    trait :percentage do
+      discount_type { "percentage" }
+      discount_value { 20.0 }
+    end
+
+    trait :expired do
+      valid_until { 1.day.ago }
+    end
+
+    trait :inactive do
+      active { false }
+    end
+
+    trait :high_minimum do
+      min_order_amount { 500.00 }
+    end
   end
 
   factory :review do
@@ -192,6 +209,16 @@ FactoryBot.define do
     trait :expired do
       after(:create) do |checkout|
         checkout.update_column(:expires_at, 1.hour.ago)
+      end
+    end
+
+    trait :with_coupon do
+      association :coupon
+      after(:create) do |checkout|
+        checkout.update!(
+          coupon_code: checkout.coupon.code,
+          discount_amount: checkout.coupon.discount_value
+        )
       end
     end
   end

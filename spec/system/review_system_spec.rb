@@ -1,11 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe 'Review functionality', type: :system, js: true do
-  let!(:user) { create(:user) }
-  let!(:product) { create(:product) }
+  let!(:user) { create(:user,
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'test@example.com',
+    password: 'password123'
+  ) }
+  let!(:product) { create(:product,
+    name: 'Test Product',
+    slug: 'test-product'
+  ) }
 
   before do
-    driven_by(:selenium_chrome_headless)
+    driven_by(:selenium, using: :headless_chrome, screen_size: [1400, 1400])
     # Sign in through the browser for system tests
     visit new_user_session_path
     fill_in 'Email', with: user.email
@@ -33,7 +41,7 @@ RSpec.describe 'Review functionality', type: :system, js: true do
 
       # Fill out the review form
       # Click on the star/label for 5 star rating
-      find('label[data-rating="5"]').click # Select 5 stars
+      find('.star-label[data-rating="5"]').click # Select 5 stars
       fill_in 'Review Title', with: 'Excellent product!'
       fill_in 'Your Review', with: 'This product exceeded my expectations. The quality is outstanding and it arrived quickly.'
 

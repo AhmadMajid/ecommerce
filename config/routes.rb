@@ -53,6 +53,8 @@ Rails.application.routes.draw do
       patch :update_payment
       get :review
       post :complete
+      post :apply_coupon
+      delete :remove_coupon
     end
   end
 

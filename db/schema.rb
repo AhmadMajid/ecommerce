@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_13_181838) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_14_004543) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -146,7 +146,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_181838) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "completed_at"
+    t.string "coupon_code"
+    t.bigint "coupon_id"
     t.index ["cart_id"], name: "index_checkouts_on_cart_id"
+    t.index ["coupon_id"], name: "index_checkouts_on_coupon_id"
     t.index ["expires_at"], name: "index_checkouts_on_expires_at"
     t.index ["session_id", "status"], name: "index_checkouts_on_session_id_and_status"
     t.index ["shipping_method_id"], name: "index_checkouts_on_shipping_method_id"
@@ -429,6 +432,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_181838) do
   add_foreign_key "carts", "users"
   add_foreign_key "categories", "categories", column: "parent_id"
   add_foreign_key "checkouts", "carts"
+  add_foreign_key "checkouts", "coupons"
   add_foreign_key "checkouts", "shipping_methods"
   add_foreign_key "checkouts", "users"
   add_foreign_key "order_items", "orders"

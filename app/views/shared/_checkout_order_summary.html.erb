@@ -38,6 +38,39 @@
       <% end %>
     </div>
 
+    <!-- Coupon Section -->
+    <div class="border-t border-gray-200 pt-4 mb-6">
+      <% if cart.coupon_code.present? %>
+        <!-- Applied Coupon -->
+        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm font-medium text-green-800">
+              Coupon Applied: <span class="font-bold"><%= cart.coupon_code %></span>
+            </span>
+          </div>
+          <%= form_with url: remove_coupon_checkout_index_path, method: :delete, local: true, class: "inline" do |form| %>
+            <%= form.submit "Remove", class: "text-xs text-red-600 hover:text-red-800 underline cursor-pointer" %>
+          <% end %>
+        </div>
+      <% else %>
+        <!-- Coupon Input -->
+        <div class="space-y-3">
+          <h4 class="text-sm font-medium text-gray-900">Have a coupon code?</h4>
+          <%= form_with url: apply_coupon_checkout_index_path, method: :post, local: true, class: "flex space-x-2" do |form| %>
+            <%= form.text_field :coupon_code,
+                placeholder: "Enter coupon code",
+                class: "flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent",
+                autocomplete: "off" %>
+            <%= form.submit "Apply",
+                class: "px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
     <!-- Order Totals -->
     <div class="border-t border-gray-200 pt-4 space-y-3">
       <!-- Subtotal -->
@@ -55,6 +88,21 @@
           $<%= number_with_precision(cart.tax_amount, precision: 2) %>
         </span>
       </div>
+
+      <!-- Discount/Coupon -->
+      <% if cart.discount_amount && cart.discount_amount > 0 %>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-600">
+            Discount
+            <% if cart.coupon_code.present? %>
+              <span class="text-xs text-green-600 font-medium">(<%= cart.coupon_code %>)</span>
+            <% end %>
+          </span>
+          <span class="text-sm font-medium text-green-600">
+            -$<%= number_with_precision(cart.discount_amount, precision: 2) %>
+          </span>
+        </div>
+      <% end %>
 
       <!-- Shipping -->
       <div class="flex items-center justify-between">
@@ -77,9 +125,12 @@
       <div class="flex items-center justify-between pt-3 border-t border-gray-200">
         <span class="text-base font-medium text-gray-900">Total</span>
         <span class="text-base font-medium text-gray-900">
-          <% if checkout&.shipping_method %>
+          <% if checkout&.total_amount %>
+            $<%= number_with_precision(checkout.total_amount, precision: 2) %>
+          <% elsif checkout&.shipping_method %>
             <% shipping_cost = checkout.shipping_method.calculate_cost(cart.total_price) %>
-            $<%= number_with_precision(cart.total_price + shipping_cost, precision: 2) %>
+            <% total_with_discount = cart.total_price + shipping_cost %>
+            $<%= number_with_precision(total_with_discount, precision: 2) %>
           <% else %>
             $<%= number_with_precision(cart.total_price, precision: 2) %>
           <% end %>

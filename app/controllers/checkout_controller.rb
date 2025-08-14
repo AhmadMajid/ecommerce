@@ -101,10 +101,41 @@ class CheckoutController < ApplicationController
       Rails.logger.debug "Redirecting to root with success message"
       redirect_to root_path, notice: 'Order completed successfully! This was a demo checkout - no real payment was processed.'
     rescue => e
-      Rails.logger.error "Checkout completion failed: #{e.class}: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
+      Rails.logger.error "Checkout completion failed: #{e.message}"
+      Rails.logger.error e.backtrace.join("
+")
       redirect_to review_checkout_index_path, alert: 'There was an error completing your order. Please try again.'
     end
+  end
+
+  def apply_coupon
+    coupon_code = params[:coupon_code]&.strip&.upcase
+
+    if coupon_code.blank?
+      redirect_back(fallback_location: shipping_checkout_index_path, alert: 'Please enter a coupon code.')
+      return
+    end
+
+    result = current_cart.apply_coupon(coupon_code)
+
+    if result[:success]
+      # Update checkout totals to reflect the coupon
+      @checkout.calculate_totals
+      @checkout.save!
+      redirect_back(fallback_location: shipping_checkout_index_path, notice: result[:message])
+    else
+      redirect_back(fallback_location: shipping_checkout_index_path, alert: result[:message])
+    end
+  end
+
+  def remove_coupon
+    result = current_cart.remove_coupon
+
+    # Update checkout totals
+    @checkout.calculate_totals
+    @checkout.save!
+
+    redirect_back(fallback_location: shipping_checkout_index_path, notice: result[:message])
   end
 
   def destroy

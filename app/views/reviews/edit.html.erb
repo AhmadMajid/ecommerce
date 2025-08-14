@@ -48,7 +48,7 @@
           <% 5.times do |i| %>
             <label class="cursor-pointer star-label" data-rating="<%= i + 1 %>">
               <%= form.radio_button :rating, i + 1, class: "sr-only rating-radio", id: "rating_#{i + 1}", checked: @review.rating == (i + 1) %>
-              <svg class="w-8 h-8 text-gray-300 hover:text-yellow-400 transition-colors rating-star"
+              <svg class="w-8 h-8 text-gray-300 transition-colors rating-star"
                    data-rating="<%= i + 1 %>"
                    fill="currentColor"
                    viewBox="0 0 20 20">
@@ -97,12 +97,20 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initializeStarRating() {
   const stars = document.querySelectorAll('.rating-star')
   const labels = document.querySelectorAll('.star-label')
   const ratingText = document.getElementById('rating-text')
   const starContainer = document.getElementById('star-rating')
   const ratingLabels = ['Select a rating', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent']
+
+  // Don't initialize if elements don't exist or already initialized
+  if (!stars.length || !labels.length || starContainer.dataset.initialized) {
+    return
+  }
+
+  // Mark as initialized to prevent double initialization
+  starContainer.dataset.initialized = 'true'
 
   // Get initial rating from the form
   const checkedRadio = document.querySelector('input[name="review[rating]"]:checked')
@@ -112,9 +120,11 @@ document.addEventListener('DOMContentLoaded', function() {
     stars.forEach((star, index) => {
       const starElement = star
       if (index < rating) {
-        starElement.style.color = '#facc15' // yellow-400
+        starElement.classList.remove('text-gray-300')
+        starElement.classList.add('text-yellow-400')
       } else {
-        starElement.style.color = '#d1d5db' // gray-300
+        starElement.classList.remove('text-yellow-400')
+        starElement.classList.add('text-gray-300')
       }
     })
   }
@@ -135,6 +145,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle hover on labels (which contain the stars)
     label.addEventListener('mouseenter', function() {
+      updateStarDisplay(rating)
+      ratingText.textContent = ratingLabels[rating]
+    })
+
+    // Also handle hover directly on stars for better responsiveness
+    star.addEventListener('mouseenter', function() {
       updateStarDisplay(rating)
       ratingText.textContent = ratingLabels[rating]
     })
@@ -178,5 +194,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize display with current rating
   resetToSelected()
-})
+}
+
+// Initialize on page load and Turbo navigation
+document.addEventListener('DOMContentLoaded', initializeStarRating)
+document.addEventListener('turbo:load', initializeStarRating)
+document.addEventListener('turbo:render', initializeStarRating)
 </script>
