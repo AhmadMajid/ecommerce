@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart Debug Test</title>
+  <script>
+    function testCartFunctions() {
+      console.log('=== CART DEBUG TEST ===');
+
+      // Test 1: Check if cart count elements exist
+      const cartCountElements = document.querySelectorAll('#cart-count, [data-cart-count], .cart-count, [data-cart-target="count"], .mini-cart-count');
+      console.log('Cart count elements found:', cartCountElements.length);
+      cartCountElements.forEach((el, i) => {
+        console.log(`Cart count element ${i}:`, el);
+      });
+
+      // Test 2: Check cart dropdown structure
+      const cartDropdown = document.querySelector('[data-controller*="cart-dropdown"]');
+      console.log('Cart dropdown element:', cartDropdown);
+
+      const cartItems = document.querySelector('#cart-items');
+      console.log('Cart items container:', cartItems);
+
+      // Test 3: Check remove buttons
+      const removeButtons = document.querySelectorAll('[data-action*="cart#removeItem"]');
+      console.log('Remove buttons found:', removeButtons.length);
+      removeButtons.forEach((btn, i) => {
+        console.log(`Remove button ${i}:`, btn);
+        console.log(`  - dataset.cartItemId: ${btn.dataset.cartItemId}`);
+        console.log(`  - dataset.itemId: ${btn.dataset.itemId}`);
+      });
+
+      // Test 4: Test fetch to cart endpoint
+      fetch('/cart.json')
+        .then(response => response.json())
+        .then(data => {
+          console.log('Cart JSON response:', data);
+        })
+        .catch(error => {
+          console.error('Cart JSON error:', error);
+        });
+    }
+
+    // Run test when page loads
+    window.addEventListener('DOMContentLoaded', testCartFunctions);
+  </script>
+</head>
+<body>
+  <h1>Cart Debug Test</h1>
+  <p>Check browser console for debug information.</p>
+  <button onclick="testCartFunctions()">Run Cart Debug Test</button>
+</body>
+</html>
