@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   resource :cart, only: [:show, :update, :destroy] do
     post :merge
     get :mini
+    patch :remove_coupon
   end
 
   resources :cart_items, only: [:create, :update, :destroy] do

@@ -1,6 +1,6 @@
 class CartsController < ApplicationController
   before_action :set_cart
-  before_action :authenticate_user!, except: [:show, :update]
+  before_action :authenticate_user!, except: [:show, :update, :mini]
 
   # GET /cart
   def show
@@ -45,11 +45,34 @@ class CartsController < ApplicationController
       @cart.reload
       flash[:success] = "Cart updated successfully!"
     elsif params[:coupon_code].present?
-      @cart.apply_coupon(params[:coupon_code])
-      flash[:success] = "Coupon applied successfully!"
+      result = @cart.apply_coupon(params[:coupon_code])
+
+      respond_to do |format|
+        format.html do
+          flash[result[:success] ? :success : :alert] = result[:message]
+          redirect_to cart_path
+        end
+        format.json do
+          if result[:success]
+            render json: cart_summary.merge(success: true, message: result[:message])
+          else
+            render json: { success: false, message: result[:message] }, status: :unprocessable_entity
+          end
+        end
+      end
+      return
     elsif params[:remove_coupon]
-      @cart.remove_coupon
-      flash[:success] = "Coupon removed"
+      result = @cart.remove_coupon
+      respond_to do |format|
+        format.html do
+          flash[:success] = result[:message]
+          redirect_to cart_path
+        end
+        format.json do
+          render json: cart_summary.merge(success: true, message: result[:message])
+        end
+      end
+      return
     end
 
     respond_to do |format|
@@ -66,6 +89,21 @@ class CartsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to cart_path }
       format.json { render json: { success: true, message: "Cart cleared" } }
+    end
+  end
+
+  # PATCH /carts/remove_coupon
+  def remove_coupon
+    result = @cart.remove_coupon
+
+    respond_to do |format|
+      format.html do
+        flash[:success] = result[:message]
+        redirect_to cart_path
+      end
+      format.json do
+        render json: cart_summary.merge(success: true, message: result[:message])
+      end
     end
   end
 
@@ -90,7 +128,7 @@ class CartsController < ApplicationController
   # GET /cart/mini (for AJAX requests)
   def mini
     @cart_items = @cart.cart_items.includes(:product).limit(5)
-    render partial: 'carts/mini_cart', locals: { cart: @cart, cart_items: @cart_items }
+    render partial: 'shared/mini_cart', locals: { cart: @cart, cart_items: @cart_items }
   end
 
   private

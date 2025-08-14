@@ -1,6 +1,7 @@
 class Cart < ApplicationRecord
   # Associations
   belongs_to :user, optional: true
+  belongs_to :coupon, optional: true
   has_many :cart_items, dependent: :destroy
   alias_method :items, :cart_items  # Alias for easier access
   has_many :products, through: :cart_items
@@ -134,16 +135,40 @@ class Cart < ApplicationRecord
   end
 
   def apply_coupon(coupon_code)
-    # This would integrate with a coupon/discount system
-    self.coupon_code = coupon_code
-    calculate_discount_amount
-    save!
+    return { success: false, message: "Coupon code cannot be blank" } if coupon_code.blank?
+
+    found_coupon = Coupon.find_by(code: coupon_code.upcase.strip)
+
+    unless found_coupon
+      return { success: false, message: "Invalid coupon code" }
+    end
+
+    unless found_coupon.valid_for_cart?(self)
+      if found_coupon.expired?
+        return { success: false, message: "This coupon has expired" }
+      elsif found_coupon.not_started?
+        return { success: false, message: "This coupon is not yet valid" }
+      elsif found_coupon.usage_exceeded?
+        return { success: false, message: "This coupon has reached its usage limit" }
+      elsif found_coupon.below_minimum_order?(self)
+        return { success: false, message: "Order must be at least #{ApplicationController.helpers.number_to_currency(found_coupon.min_order_amount)} to use this coupon" }
+      else
+        return { success: false, message: "This coupon cannot be applied to your cart" }
+      end
+    end
+
+    self.coupon = found_coupon
+    self.coupon_code = found_coupon.code
+    recalculate_totals!
+
+    { success: true, message: "Coupon applied successfully! You saved #{ApplicationController.helpers.number_to_currency(discount_amount)}" }
   end
 
   def remove_coupon
+    self.coupon = nil
     self.coupon_code = nil
-    self.discount_amount = 0
-    save!
+    recalculate_totals!
+    { success: true, message: "Coupon removed" }
   end
 
   def convert_to_order!
@@ -229,7 +254,10 @@ class Cart < ApplicationRecord
   end
 
   def calculate_discount_amount
-    if coupon_code.present?
+    if coupon.present?
+      self.discount_amount = coupon.calculate_discount(subtotal)
+    elsif coupon_code.present?
+      # Fallback for legacy hardcoded coupons
       case coupon_code.downcase
       when 'save10'
         self.discount_amount = [(subtotal * 0.10).round(2), 50.0].min

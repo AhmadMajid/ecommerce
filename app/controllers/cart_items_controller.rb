@@ -93,7 +93,8 @@ class CartItemsController < ApplicationController
 
   # PATCH/PUT /cart_items/1
   def update
-    quantity = cart_item_params[:quantity] || params[:quantity]
+    # Handle both nested cart_item[quantity] and direct quantity params
+    quantity = cart_item_params&.dig(:quantity) || params[:quantity]
     quantity = quantity.to_i
 
     begin
