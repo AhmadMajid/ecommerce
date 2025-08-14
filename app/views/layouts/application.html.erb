@@ -89,7 +89,7 @@
               <button data-action="click->cart-dropdown#toggle"
                       class="relative p-2 text-gray-600 hover:text-purple-600 transition-colors duration-200">
                 <i class="fas fa-shopping-cart text-xl"></i>
-                <span id="cart-count"
+                <span id="cart-count" data-cart-count
                       class="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium <%= current_cart.items.sum(:quantity) > 0 ? '' : 'hidden' %>">
                   <%= current_cart.items.sum(:quantity) %>
                 </span>
@@ -116,8 +116,9 @@
                           <h4 class="font-medium text-sm text-gray-900"><%= truncate(item.product.name, length: 30) %></h4>
                           <p class="text-sm text-gray-500">Qty: <%= item.quantity %> × $<%= item.product.price %></p>
                         </div>
-                        <button data-action="click->cart#removeItem"
-                                data-item-id="<%= item.id %>"
+                        <button data-controller="cart"
+                                data-action="click->cart#removeItem"
+                                data-cart-item-id="<%= item.id %>"
                                 class="text-red-400 hover:text-red-600 transition-colors">
                           <i class="fas fa-trash text-sm"></i>
                         </button>
