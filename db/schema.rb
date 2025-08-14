@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_13_114027) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_13_181838) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,6 +96,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_114027) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "coupon_id"
+    t.index ["coupon_id"], name: "index_carts_on_coupon_id"
     t.index ["created_at"], name: "index_carts_on_created_at"
     t.index ["expires_at"], name: "index_carts_on_expires_at"
     t.index ["session_id", "status"], name: "index_carts_on_session_id_and_status"
@@ -164,6 +166,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_114027) do
     t.index ["created_at"], name: "index_contact_messages_on_created_at"
     t.index ["status", "created_at"], name: "index_contact_messages_on_status_and_created_at"
     t.index ["status"], name: "index_contact_messages_on_status"
+  end
+
+  create_table "coupons", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "discount_type", null: false
+    t.decimal "discount_value", precision: 10, scale: 2, null: false
+    t.datetime "valid_from"
+    t.datetime "valid_until"
+    t.decimal "min_order_amount", precision: 10, scale: 2, default: "0.0"
+    t.decimal "max_discount_amount", precision: 10, scale: 2
+    t.integer "usage_limit"
+    t.integer "used_count", default: 0
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_coupons_on_active"
+    t.index ["code"], name: "index_coupons_on_code", unique: true
   end
 
   create_table "newsletters", force: :cascade do |t|
@@ -406,6 +425,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_114027) do
   add_foreign_key "addresses", "users"
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "products"
+  add_foreign_key "carts", "coupons"
   add_foreign_key "carts", "users"
   add_foreign_key "categories", "categories", column: "parent_id"
   add_foreign_key "checkouts", "carts"
