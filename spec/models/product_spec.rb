@@ -221,4 +221,93 @@ RSpec.describe Product, type: :model do
       end
     end
   end
+
+  describe 'tag functionality' do
+    let!(:product) { create(:product, category: electronics_category) }
+
+    describe '#tag_list' do
+      context 'when tags is nil' do
+        it 'returns empty array' do
+          product.update(tags: nil)
+          expect(product.tag_list).to eq([])
+        end
+      end
+
+      context 'when tags is empty string' do
+        it 'returns empty array' do
+          product.update(tags: '')
+          expect(product.tag_list).to eq([])
+        end
+      end
+
+      context 'when tags has comma-separated values' do
+        it 'returns array of tags' do
+          product.update(tags: 'electronics, gadget, smartphone')
+          expect(product.tag_list).to eq(['electronics', 'gadget', 'smartphone'])
+        end
+
+        it 'strips whitespace from tags' do
+          product.update(tags: ' electronics , gadget , smartphone ')
+          expect(product.tag_list).to eq(['electronics', 'gadget', 'smartphone'])
+        end
+      end
+    end
+
+    describe '#tag_list=' do
+      context 'with array input' do
+        it 'converts array to comma-separated string' do
+          product.tag_list = ['electronics', 'gadget', 'smartphone']
+          expect(product.tags).to eq('electronics, gadget, smartphone')
+        end
+      end
+
+      context 'with string input' do
+        it 'stores string as is' do
+          product.tag_list = 'electronics, gadget, smartphone'
+          expect(product.tags).to eq('electronics, gadget, smartphone')
+        end
+      end
+
+      context 'with nil input' do
+        it 'stores empty string' do
+          product.tag_list = nil
+          expect(product.tags).to eq('')
+        end
+      end
+    end
+
+    describe 'tag methods are public' do
+      it 'tag_list is a public method' do
+        expect(product.public_methods).to include(:tag_list)
+      end
+
+      it 'tag_list= is a public method' do
+        expect(product.public_methods).to include(:tag_list=)
+      end
+    end
+  end
+
+  describe 'variant functionality' do
+    let!(:product) { create(:product, category: electronics_category) }
+
+    describe '#has_variants?' do
+      it 'returns false (no variants implemented yet)' do
+        expect(product.has_variants?).to be_falsey
+      end
+    end
+
+    describe '#default_variant' do
+      it 'returns nil (no variants implemented yet)' do
+        expect(product.default_variant).to be_nil
+      end
+    end
+  end
+
+  describe '#can_be_deleted?' do
+    let!(:product) { create(:product, category: electronics_category) }
+
+    it 'returns true when no cart items or order items exist' do
+      expect(product.can_be_deleted?).to be_truthy
+    end
+  end
 end

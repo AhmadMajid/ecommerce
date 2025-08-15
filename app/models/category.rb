@@ -30,7 +30,7 @@ class Category < ApplicationRecord
   scope :with_products, -> { joins(:products).distinct }
 
   # Callbacks
-  before_validation :generate_slug, if: :name_changed?
+  before_validation :generate_slug, if: -> { name.present? && (name_changed? || slug.blank?) }
   before_validation :set_meta_title, if: :name_changed?
   before_validation :set_position, if: :new_record?
 
