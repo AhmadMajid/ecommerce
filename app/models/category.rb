@@ -14,7 +14,7 @@ class Category < ApplicationRecord
   validates :description, length: { maximum: 1000 }, allow_blank: true
   validates :meta_title, length: { maximum: 60 }, allow_blank: true
   validates :meta_description, length: { maximum: 160 }, allow_blank: true
-  validates :position, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :position, numericality: { greater_than_or_equal_to: 0 }, allow_blank: true
 
   # Custom validations
   validate :cannot_be_parent_of_itself
@@ -32,6 +32,7 @@ class Category < ApplicationRecord
   # Callbacks
   before_validation :generate_slug, if: :name_changed?
   before_validation :set_meta_title, if: :name_changed?
+  before_validation :set_position, if: :new_record?
 
   # Instance methods
   def root?
@@ -118,6 +119,20 @@ class Category < ApplicationRecord
     end
   end
 
+  # Total products count including subcategories
+  def total_products_count
+    products_count(include_descendants: true)
+  end
+
+  # Sort order support (uses position field)
+  def sort_order
+    position || 0
+  end
+
+  def sort_order=(value)
+    self.position = value.to_i
+  end
+
   def product_count
     active_products_count(include_descendants: true)
   end
@@ -157,6 +172,13 @@ class Category < ApplicationRecord
 
   def set_meta_title
     self.meta_title = name if meta_title.blank? && name.present?
+  end
+
+  def set_position
+    if position.blank?
+      max_position = Category.where(parent_id: parent_id).maximum(:position) || 0
+      self.position = max_position + 1
+    end
   end
 
   def cannot_be_parent_of_itself

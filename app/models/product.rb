@@ -3,7 +3,6 @@ class Product < ApplicationRecord
 
   # Associations
   belongs_to :category
-  has_many :product_variants, dependent: :destroy
   has_many :cart_items, dependent: :destroy
   has_many :order_items, dependent: :destroy
   has_many :wishlists, dependent: :destroy
@@ -190,11 +189,26 @@ class Product < ApplicationRecord
   end
 
   def has_variants?
-    product_variants.any?
+    false # No variants for now
   end
 
   def default_variant
-    product_variants.first
+    nil # No variants for now
+  end
+
+  # Tag support
+  def tag_list
+    # Parse tags from the tags text field
+    tags.present? ? tags.split(',').map(&:strip) : []
+  end
+
+  def tag_list=(value)
+    # Convert array or string to comma-separated tags
+    if value.is_a?(Array)
+      self.tags = value.join(', ')
+    else
+      self.tags = value.to_s
+    end
   end
 
   private
@@ -265,8 +279,7 @@ class Product < ApplicationRecord
   end
 
   def update_variant_pricing
-    # Update variant pricing if they don't have custom pricing
-    product_variants.where(price: nil).update_all(price: price)
+    # No variants for now
   end
 
   def compare_at_price_greater_than_price

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_14_004543) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_15_165602) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -331,6 +331,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_14_004543) do
     t.boolean "requires_shipping", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "tags"
+    t.integer "sort_order", default: 0
     t.index ["active", "featured"], name: "index_products_on_active_and_featured"
     t.index ["active", "published_at"], name: "index_products_on_active_and_published_at"
     t.index ["active"], name: "index_products_on_active"
@@ -341,6 +343,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_14_004543) do
     t.index ["published_at"], name: "index_products_on_published_at"
     t.index ["sku"], name: "index_products_on_sku", unique: true
     t.index ["slug"], name: "index_products_on_slug", unique: true
+    t.index ["sort_order"], name: "index_products_on_sort_order"
     t.index ["track_inventory", "inventory_quantity"], name: "index_products_on_track_inventory_and_inventory_quantity"
   end
 

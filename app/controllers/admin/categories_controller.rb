@@ -6,11 +6,40 @@ class Admin::CategoriesController < Admin::BaseController
     add_breadcrumb('Categories')
 
     @categories = Category.includes(:parent, :products)
-                         .ordered
-                         .page(params[:page])
-                         .per(20)
+
+    # Apply search filter
+    if params[:search].present?
+      @categories = @categories.where("name ILIKE ? OR description ILIKE ?", 
+                                     "%#{params[:search]}%", "%#{params[:search]}%")
+    end
+
+    # Apply parent category filter
+    if params[:parent_id].present?
+      if params[:parent_id] == 'root'
+        @categories = @categories.where(parent_id: nil)
+      else
+        @categories = @categories.where(parent_id: params[:parent_id])
+      end
+    end
+
+    # Apply status filter
+    if params[:status].present?
+      case params[:status]
+      when 'active'
+        @categories = @categories.where(active: true)
+      when 'inactive'
+        @categories = @categories.where(active: false)
+      when 'featured'
+        @categories = @categories.where(featured: true)
+      end
+    end
+
+    @categories = @categories.ordered
+                             .page(params[:page])
+                             .per(20)
 
     @root_categories = Category.root_categories.ordered
+    @parent_categories = Category.root_categories.active.ordered
   end
 
   def show

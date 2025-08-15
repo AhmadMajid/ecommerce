@@ -1,0 +1,200 @@
+<!-- BEGIN app/views/admin/products/show.html.erb -->
+
+<div class="mb-6">
+  <div class="flex items-center space-x-2 text-sm text-gray-500 mb-2">
+    <a class="hover:text-gray-700" href="<%= admin_products_path %>">Products</a>
+    <span>/</span>
+    <span class="text-gray-900"><%= @product.name %></span>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900"><%= @product.name %></h1>
+    <div class="flex space-x-2">
+      <%= link_to edit_admin_product_path(@product), class: "btn btn-secondary" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+        Edit
+      <% end %>
+      <%= link_to admin_product_path(@product), method: :delete, 
+          confirm: "Are you sure you want to delete this product?", 
+          class: "btn btn-danger" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+        Delete
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Product Details -->
+  <div class="lg:col-span-2">
+    <%= render 'shared/card', header: 'Product Information' do %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Name</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @product.name %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">SKU</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @product.sku %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Category</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @product.category.name %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <p class="mt-1">
+            <% if @product.active? %>
+              <%= render 'shared/badge', text: 'Active', variant: 'success' %>
+            <% else %>
+              <%= render 'shared/badge', text: 'Inactive', variant: 'secondary' %>
+            <% end %>
+          </p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Price</label>
+          <p class="mt-1 text-sm text-gray-900">$<%= @product.price %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Compare At Price</label>
+          <p class="mt-1 text-sm text-gray-900">
+            <% if @product.compare_at_price.present? %>
+              $<%= @product.compare_at_price %>
+            <% else %>
+              -
+            <% end %>
+          </p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Inventory</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @product.inventory_quantity %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Weight</label>
+          <p class="mt-1 text-sm text-gray-900">
+            <% if @product.weight.present? %>
+              <%= @product.weight %> kg
+            <% else %>
+              -
+            <% end %>
+          </p>
+        </div>
+      </div>
+      
+      <% if @product.description.present? %>
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700">Description</label>
+          <div class="mt-1 text-sm text-gray-900 prose max-w-none">
+            <%= simple_format(@product.description) %>
+          </div>
+        </div>
+      <% end %>
+      
+      <% if @product.tag_list.any? %>
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700">Tags</label>
+          <div class="mt-1 flex flex-wrap gap-2">
+            <% @product.tag_list.each do |tag| %>
+              <%= render 'shared/badge', text: tag, variant: 'secondary' %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  
+  <!-- Sidebar -->
+  <div>
+    <%= render 'shared/card', header: 'Quick Stats' do %>
+      <div class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Status</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">
+            <% if @product.active? %>
+              <span class="text-green-600">Active</span>
+            <% else %>
+              <span class="text-red-600">Inactive</span>
+            <% end %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Created</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @product.created_at.strftime("%B %d, %Y") %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @product.updated_at.strftime("%B %d, %Y") %>
+          </dd>
+        </div>
+        
+        <% if @product.published_at.present? %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Published</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              <%= @product.published_at.strftime("%B %d, %Y") %>
+            </dd>
+          </div>
+        <% end %>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Stock Status</dt>
+          <dd class="mt-1">
+            <% case @product.stock_status %>
+            <% when 'in_stock' %>
+              <%= render 'shared/badge', text: 'In Stock', variant: 'success' %>
+            <% when 'low_stock' %>
+              <%= render 'shared/badge', text: 'Low Stock', variant: 'warning' %>
+            <% when 'out_of_stock' %>
+              <%= render 'shared/badge', text: 'Out of Stock', variant: 'danger' %>
+            <% else %>
+              <%= render 'shared/badge', text: 'Unlimited', variant: 'secondary' %>
+            <% end %>
+          </dd>
+        </div>
+      </div>
+    <% end %>
+    
+    <%= render 'shared/card', header: 'SEO' do %>
+      <div class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Meta Title</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @product.meta_title.present? ? @product.meta_title : '-' %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Meta Description</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @product.meta_description.present? ? @product.meta_description : '-' %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Slug</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <code class="bg-gray-100 px-1 rounded"><%= @product.slug %></code>
+          </dd>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- END app/views/admin/products/show.html.erb -->

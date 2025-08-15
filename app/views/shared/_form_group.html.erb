@@ -1,0 +1,11 @@
+<div class="space-y-1">
+  <% if local_assigns[:label] %>
+    <label class="block font-medium text-gray-700 <%= 'required' if local_assigns[:required] %>">
+      <%= local_assigns[:label] %>
+      <% if local_assigns[:required] %><span class="text-red-500">*</span><% end %>
+    </label>
+  <% end %>
+  <div>
+    <%= yield %>
+  </div>
+</div>

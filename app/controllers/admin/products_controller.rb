@@ -43,6 +43,12 @@ class Admin::ProductsController < Admin::BaseController
 
   def create
     @product = Product.new(product_params)
+    
+    # Handle save as draft
+    if params[:save_as_draft]
+      @product.active = false
+      @product.published_at = nil
+    end
 
     if @product.save
       redirect_to admin_product_path(@product), notice: 'Product was successfully created.'
@@ -59,6 +65,13 @@ class Admin::ProductsController < Admin::BaseController
   end
 
   def update
+    # Handle save as draft
+    if params[:save_as_draft]
+      @product.assign_attributes(product_params)
+      @product.active = false
+      @product.published_at = nil
+    end
+
     if @product.update(product_params)
       redirect_to admin_product_path(@product), notice: 'Product was successfully updated.'
     else
@@ -148,6 +161,6 @@ class Admin::ProductsController < Admin::BaseController
                                   :inventory_quantity, :track_inventory, :allow_backorders,
                                   :low_stock_threshold, :active, :featured, :published_at,
                                   :meta_title, :meta_description, :meta_keywords, :category_id,
-                                  :taxable, :requires_shipping, images: [])
+                                  :taxable, :requires_shipping, :tags, :sort_order, images: [])
   end
 end

@@ -1,0 +1,257 @@
+<!-- BEGIN app/views/admin/categories/show.html.erb -->
+
+<div class="mb-6">
+  <div class="flex items-center space-x-2 text-sm text-gray-500 mb-2">
+    <a class="hover:text-gray-700" href="<%= admin_categories_path %>">Categories</a>
+    <span>/</span>
+    <span class="text-gray-900"><%= @category.name %></span>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900"><%= @category.name %></h1>
+    <div class="flex space-x-2">
+      <%= link_to edit_admin_category_path(@category), class: "btn btn-secondary" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+        Edit
+      <% end %>
+      <%= link_to admin_category_path(@category), method: :delete, 
+          confirm: "Are you sure you want to delete this category?", 
+          class: "btn btn-danger" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+        Delete
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Category Details -->
+  <div class="lg:col-span-2">
+    <%= render 'shared/card', header: 'Category Information' do %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Name</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @category.name %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Slug</label>
+          <p class="mt-1 text-sm text-gray-900">
+            <code class="bg-gray-100 px-1 rounded"><%= @category.slug %></code>
+          </p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parent Category</label>
+          <p class="mt-1 text-sm text-gray-900">
+            <% if @category.parent.present? %>
+              <%= link_to @category.parent.name, admin_category_path(@category.parent), class: "text-indigo-600 hover:text-indigo-500" %>
+            <% else %>
+              Root Category
+            <% end %>
+          </p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <p class="mt-1">
+            <% if @category.active? %>
+              <%= render 'shared/badge', text: 'Active', variant: 'success' %>
+            <% else %>
+              <%= render 'shared/badge', text: 'Inactive', variant: 'secondary' %>
+            <% end %>
+          </p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Position</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @category.position %></p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Featured</label>
+          <p class="mt-1">
+            <% if @category.featured? %>
+              <%= render 'shared/badge', text: 'Yes', variant: 'success' %>
+            <% else %>
+              <%= render 'shared/badge', text: 'No', variant: 'secondary' %>
+            <% end %>
+          </p>
+        </div>
+      </div>
+      
+      <% if @category.description.present? %>
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700">Description</label>
+          <div class="mt-1 text-sm text-gray-900 prose max-w-none">
+            <%= simple_format(@category.description) %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <!-- Products in this Category -->
+    <%= render 'shared/card', header: "Products (#{@products.total_count})" do %>
+      <% if @products.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @products.each do |product| %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900"><%= product.name %></div>
+                    <div class="text-sm text-gray-500"><%= truncate(product.short_description, length: 50) if product.short_description %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900"><%= product.sku %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">$<%= product.price %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900"><%= product.inventory_quantity %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <% if product.active? %>
+                      <%= render 'shared/badge', text: 'Active', variant: 'success' %>
+                    <% else %>
+                      <%= render 'shared/badge', text: 'Inactive', variant: 'secondary' %>
+                    <% end %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <%= link_to "View", admin_product_path(product), class: "text-indigo-600 hover:text-indigo-900 mr-2" %>
+                    <%= link_to "Edit", edit_admin_product_path(product), class: "text-indigo-600 hover:text-indigo-900" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="mt-4">
+          <%= paginate @products, theme: 'twitter_bootstrap_4' %>
+        </div>
+      <% else %>
+        <div class="text-center py-8">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No products</h3>
+          <p class="mt-1 text-sm text-gray-500">This category doesn't have any products yet.</p>
+          <div class="mt-6">
+            <%= link_to new_admin_product_path(category_id: @category.id), class: "btn btn-primary" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add Product
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  
+  <!-- Sidebar -->
+  <div>
+    <%= render 'shared/card', header: 'Category Stats' do %>
+      <div class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Total Products</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">
+            <%= @category.total_products_count %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Direct Products</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">
+            <%= @category.products.count %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Subcategories</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">
+            <%= @category.children.count %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Level</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">
+            <%= @category.level %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Created</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @category.created_at.strftime("%B %d, %Y") %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @category.updated_at.strftime("%B %d, %Y") %>
+          </dd>
+        </div>
+      </div>
+    <% end %>
+    
+    <%= render 'shared/card', header: 'SEO' do %>
+      <div class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Meta Title</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @category.meta_title.present? ? @category.meta_title : '-' %>
+          </dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Meta Description</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <%= @category.meta_description.present? ? @category.meta_description : '-' %>
+          </dd>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @category.children.any? %>
+      <%= render 'shared/card', header: 'Subcategories' do %>
+        <div class="space-y-2">
+          <% @category.children.ordered.each do |child| %>
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+              <div>
+                <%= link_to child.name, admin_category_path(child), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+                <p class="text-xs text-gray-500"><%= pluralize(child.products.count, 'product') %></p>
+              </div>
+              <% if child.active? %>
+                <%= render 'shared/badge', text: 'Active', variant: 'success' %>
+              <% else %>
+                <%= render 'shared/badge', text: 'Inactive', variant: 'secondary' %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<!-- END app/views/admin/categories/show.html.erb -->
