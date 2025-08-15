@@ -75,11 +75,11 @@ Rails.application.routes.draw do
 
   # Newsletter subscription
   resources :newsletters, only: [:create]  # User account routes
-  resources :users, only: [:show, :edit, :update] do
-    member do
-      get :profile
-    end
-  end
+  # resources :users, only: [:show, :edit, :update] do
+  #   member do
+  #     get :profile
+  #   end
+  # end
 
   # Address management
   resources :addresses do

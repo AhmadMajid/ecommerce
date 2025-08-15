@@ -35,7 +35,7 @@ class User < ApplicationRecord
             allow_blank: true
   validates :role, presence: true
   validates :date_of_birth, presence: true,
-            inclusion: { in: 100.years.ago..18.years.ago, message: "Must be at least 18 years old" },
+            inclusion: { in: 160.years.ago..18.years.ago, message: "Must be at least 18 years old and not more than 160 years ago" },
             allow_blank: true
 
   # Scopes
