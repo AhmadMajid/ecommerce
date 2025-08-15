@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin Categories', type: :request do
-  let(:admin_user) { create(:user, role: 'admin') }
+  let(:admin_user) { create(:user, role: :admin) }
   let(:category) { create(:category) }
   let(:parent_category) { create(:category, name: 'Parent Category') }
 
@@ -167,7 +167,8 @@ RSpec.describe 'Admin Categories', type: :request do
 
     it 'redirects to the category' do
       patch admin_category_path(category), params: { category: update_attributes }
-      expect(response).to redirect_to(admin_category_path(category))
+      updated_category = Category.find(category.id)
+      expect(response).to redirect_to(admin_category_path(updated_category))
     end
   end
 

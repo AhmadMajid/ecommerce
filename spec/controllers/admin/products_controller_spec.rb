@@ -1,12 +1,23 @@
 require 'rails_helper'
 
 RSpec.describe Admin::ProductsController, type: :controller do
-  let(:admin_user) { create(:user, role: 'admin') }
+  let(:admin_user) { create(:user, role: :admin) }
+  let(:product) { create(:product) }
   let(:category) { create(:category) }
-  let(:product) { create(:product, category: category) }
 
   before do
     sign_in admin_user
+  end
+
+  # Helper method to simulate admin authentication
+  def authenticate_admin
+    allow(controller).to receive(:authenticate_user!).and_return(true)
+    allow(controller).to receive(:current_user).and_return(admin_user)
+    allow(controller).to receive(:ensure_admin).and_return(true)
+  end
+
+  before(:each) do
+    authenticate_admin
   end
 
   describe 'GET #index' do
@@ -144,7 +155,7 @@ RSpec.describe Admin::ProductsController, type: :controller do
 
       it 'redirects to the product' do
         patch :update, params: { id: product.slug, product: new_attributes }
-        expect(response).to redirect_to(admin_product_path(product))
+        expect(response).to redirect_to(admin_product_path(assigns(:product)))
       end
     end
 

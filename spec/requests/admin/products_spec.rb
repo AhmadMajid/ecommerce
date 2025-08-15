@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin Products', type: :request do
-  let(:admin_user) { create(:user, role: 'admin') }
+  let(:admin_user) { create(:user, role: :admin) }
   let(:category) { create(:category) }
   let(:product) { create(:product, category: category) }
 
@@ -134,7 +134,8 @@ RSpec.describe 'Admin Products', type: :request do
 
     it 'redirects to the product' do
       patch admin_product_path(product), params: { product: update_attributes }
-      expect(response).to redirect_to(admin_product_path(product))
+      updated_product = Product.find(product.id)
+      expect(response).to redirect_to(admin_product_path(updated_product))
     end
 
     context 'with save_as_draft' do
