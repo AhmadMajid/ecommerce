@@ -1,18 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin Contact Messages Management', type: :request do
+  include Warden::Test::Helpers
+  
   let(:admin_user) { create(:admin_user) }
   let(:regular_user) { create(:user) }
 
   describe 'Admin Contact Messages Workflow' do
     before do
-      # Sign in admin user using POST to session path for request specs
-      post user_session_path, params: {
-        user: {
-          email: admin_user.email,
-          password: admin_user.password
-        }
-      }
+      login_as(admin_user, scope: :user)
+    end
+
+    after do
+      Warden.test_reset!
     end
 
     describe 'GET /admin/contact_messages' do

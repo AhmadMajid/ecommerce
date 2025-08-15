@@ -1,12 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin Products', type: :request do
-  let(:admin_user) { create(:user, role: :admin) }
+  include Warden::Test::Helpers
+  
+  let(:admin_user) { create(:admin_user) }
   let(:category) { create(:category) }
   let(:product) { create(:product, category: category) }
 
   before do
-    sign_in admin_user
+    login_as(admin_user, scope: :user)
+  end
+
+  after do
+    Warden.test_reset!
   end
 
   describe 'GET /admin/products' do

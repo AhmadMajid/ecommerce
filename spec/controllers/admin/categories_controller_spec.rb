@@ -1,24 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe Admin::CategoriesController, type: :controller do
-  let(:admin_user) { create(:user, role: :admin) }
+  include Devise::Test::ControllerHelpers
+  
+  let!(:admin_user) { create(:admin_user) }
   let(:category) { create(:category) }
   let(:parent_category) { create(:category, name: 'Parent Category') }
   let(:child_category) { create(:category, name: 'Child Category', parent: parent_category) }
 
   before do
-    sign_in admin_user
-  end
-
-  # Helper method to simulate admin authentication
-  def authenticate_admin
+    # Mock authentication methods directly instead of using sign_in
     allow(controller).to receive(:authenticate_user!).and_return(true)
-    allow(controller).to receive(:current_user).and_return(admin_user)
+    allow(controller).to receive(:current_user).and_return(admin_user) 
     allow(controller).to receive(:ensure_admin).and_return(true)
-  end
-
-  before(:each) do
-    authenticate_admin
   end
 
   describe 'GET #index' do

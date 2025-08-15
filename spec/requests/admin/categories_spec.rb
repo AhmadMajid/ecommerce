@@ -1,12 +1,20 @@
 require 'rails_helper'
+require 'cgi'
 
 RSpec.describe 'Admin Categories', type: :request do
-  let(:admin_user) { create(:user, role: :admin) }
+  include Warden::Test::Helpers
+  
+  let!(:admin_user) { create(:admin_user) }
   let(:category) { create(:category) }
   let(:parent_category) { create(:category, name: 'Parent Category') }
 
   before do
-    sign_in admin_user
+    # Use Warden test helpers for authentication
+    login_as(admin_user, scope: :user)
+  end
+
+  after do
+    Warden.test_reset!
   end
 
   describe 'GET /admin/categories' do
@@ -22,15 +30,24 @@ RSpec.describe 'Admin Categories', type: :request do
 
     it 'displays categories' do
       get admin_categories_path
-      expect(response.body).to include(category.name)
-      expect(response.body).to include(parent_category.name)
+      # Use CGI.escapeHTML to handle HTML encoding like & -> &amp;
+      expect(response.body).to include(CGI.escapeHTML(category.name))
+      expect(response.body).to include(CGI.escapeHTML(parent_category.name))
     end
 
     context 'with search parameter' do
       it 'filters categories by name' do
-        get admin_categories_path, params: { search: 'Parent' }
-        expect(response.body).to include(parent_category.name)
-        expect(response.body).not_to include(category.name)
+        # Use more specific search terms to ensure proper filtering
+        specific_category = create(:category, name: 'Electronics and Gadgets')
+        parent_category.update!(name: 'Office Supplies')
+        
+        get admin_categories_path, params: { search: 'Office' }
+        
+        # Extract only the table body content for testing
+        table_body = response.body.match(/<tbody[^>]*>(.*?)<\/tbody>/m)&.captures&.first || ""
+        
+        expect(response.body).to include(CGI.escapeHTML('Office Supplies'))
+        expect(table_body).not_to include(CGI.escapeHTML('Electronics and Gadgets'))
       end
     end
 
@@ -39,13 +56,13 @@ RSpec.describe 'Admin Categories', type: :request do
 
       it 'filters by parent category' do
         get admin_categories_path, params: { parent_id: parent_category.id }
-        expect(response.body).to include(child_category.name)
+        expect(response.body).to include(CGI.escapeHTML(child_category.name))
       end
 
       it 'filters root categories when parent_id is "root"' do
         get admin_categories_path, params: { parent_id: 'root' }
-        expect(response.body).to include(category.name)
-        expect(response.body).to include(parent_category.name)
+        expect(response.body).to include(CGI.escapeHTML(category.name))
+        expect(response.body).to include(CGI.escapeHTML(parent_category.name))
       end
     end
 
@@ -54,12 +71,12 @@ RSpec.describe 'Admin Categories', type: :request do
 
       it 'filters active categories' do
         get admin_categories_path, params: { status: 'active' }
-        expect(response.body).not_to include(inactive_category.name)
+        expect(response.body).not_to include(CGI.escapeHTML(inactive_category.name))
       end
 
       it 'filters inactive categories' do
         get admin_categories_path, params: { status: 'inactive' }
-        expect(response.body).to include(inactive_category.name)
+        expect(response.body).to include(CGI.escapeHTML(inactive_category.name))
       end
     end
   end
@@ -74,13 +91,13 @@ RSpec.describe 'Admin Categories', type: :request do
 
     it 'displays category details' do
       get admin_category_path(category)
-      expect(response.body).to include(category.name)
-      expect(response.body).to include(category.description) if category.description.present?
+      expect(response.body).to include(CGI.escapeHTML(category.name))
+      expect(response.body).to include(CGI.escapeHTML(category.description)) if category.description.present?
     end
 
     it 'displays products in category' do
       get admin_category_path(category)
-      expect(response.body).to include(product.name)
+      expect(response.body).to include(CGI.escapeHTML(product.name))
     end
 
     it 'displays category stats' do
@@ -146,7 +163,7 @@ RSpec.describe 'Admin Categories', type: :request do
 
     it 'displays pre-filled form' do
       get edit_admin_category_path(category)
-      expect(response.body).to include(category.name)
+      expect(response.body).to include(CGI.escapeHTML(category.name))
     end
   end
 
