@@ -74,12 +74,15 @@ Rails.application.routes.draw do
   get "gift-cards", to: "pages#gift_cards"
 
   # Newsletter subscription
-  resources :newsletters, only: [:create]  # User account routes
-  # resources :users, only: [:show, :edit, :update] do
-  #   member do
-  #     get :profile
-  #   end
-  # end
+  resources :newsletters, only: [:create]
+  
+  # User profile routes
+  resource :profile, only: [:show, :edit, :update], controller: 'users/profile' do
+    member do
+      patch :update_password
+      patch :update_preferences
+    end
+  end
 
   # Address management
   resources :addresses do

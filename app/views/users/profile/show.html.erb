@@ -1,0 +1,210 @@
+<% content_for :title, "My Profile" %>
+
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
+      <p class="text-gray-600 mt-2">Manage your account information and preferences</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Profile Overview Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
+            <%= link_to edit_profile_path, class: "inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors" do %>
+              <i class="fas fa-edit mr-2"></i>
+              Edit Profile
+            <% end %>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+              <dd class="mt-1 text-lg text-gray-900"><%= @user.full_name %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Email</dt>
+              <dd class="mt-1 text-lg text-gray-900"><%= @user.email %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Phone</dt>
+              <dd class="mt-1 text-lg text-gray-900"><%= @user.phone.present? ? @user.phone : "Not provided" %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
+              <dd class="mt-1 text-lg text-gray-900">
+                <%= @user.date_of_birth.present? ? @user.date_of_birth.strftime("%B %d, %Y") : "Not provided" %>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Member Since</dt>
+              <dd class="mt-1 text-lg text-gray-900"><%= @user.created_at.strftime("%B %Y") %></dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Account Status</dt>
+              <dd class="mt-1">
+                <% if @user.active? %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    Active
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <i class="fas fa-times-circle mr-1"></i>
+                    Inactive
+                  </span>
+                <% end %>
+              </dd>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <% if @recent_orders.present? %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold text-gray-900">Recent Orders</h2>
+              <%= link_to "#", class: "text-indigo-600 hover:text-indigo-700 text-sm font-medium" do %>
+                View All Orders
+                <i class="fas fa-arrow-right ml-1"></i>
+              <% end %>
+            </div>
+
+            <div class="space-y-4">
+              <% @recent_orders.each do |order| %>
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <p class="font-medium text-gray-900">Order #<%= order.id %></p>
+                    <p class="text-sm text-gray-500"><%= order.created_at.strftime("%B %d, %Y") %></p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-medium text-gray-900">$<%= order.total %></p>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <%= order.status.humanize %>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Wishlist Preview -->
+        <% if @wishlist_items.present? %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold text-gray-900">Wishlist Items</h2>
+              <%= link_to wishlists_path, class: "text-indigo-600 hover:text-indigo-700 text-sm font-medium" do %>
+                View Full Wishlist
+                <i class="fas fa-arrow-right ml-1"></i>
+              <% end %>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <% @wishlist_items.each do |wishlist_item| %>
+                <div class="group relative">
+                  <%= link_to product_path(wishlist_item.product), class: "block" do %>
+                    <div class="aspect-square w-full overflow-hidden rounded-lg bg-gray-200">
+                      <% if wishlist_item.product.primary_image %>
+                        <%= image_tag(wishlist_item.product.primary_image, 
+                                    alt: wishlist_item.product.name,
+                                    class: "h-full w-full object-cover object-center group-hover:opacity-75 transition-opacity") %>
+                      <% else %>
+                        <div class="h-full w-full flex items-center justify-center bg-gray-200">
+                          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                        </div>
+                      <% end %>
+                    </div>
+                    <div class="mt-2">
+                      <h3 class="text-sm font-medium text-gray-900 truncate"><%= wishlist_item.product.name %></h3>
+                      <p class="text-sm text-indigo-600 font-medium">$<%= wishlist_item.product.price %></p>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <div class="space-y-3">
+            <%= link_to edit_profile_path, class: "flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+              <i class="fas fa-user-edit text-indigo-600 mr-3"></i>
+              <span>Edit Profile</span>
+            <% end %>
+            
+            <%= link_to addresses_path, class: "flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+              <i class="fas fa-map-marker-alt text-green-600 mr-3"></i>
+              <span>Manage Addresses</span>
+            <% end %>
+            
+            <%= link_to wishlists_path, class: "flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+              <i class="fas fa-heart text-red-600 mr-3"></i>
+              <span>My Wishlist</span>
+            <% end %>
+            
+            <%= link_to "#", class: "flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+              <i class="fas fa-box text-blue-600 mr-3"></i>
+              <span>Order History</span>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Account Stats -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Overview</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Addresses</span>
+              <span class="font-medium text-gray-900"><%= @address_count %></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Wishlist Items</span>
+              <span class="font-medium text-gray-900"><%= @wishlist_items.count %></span>
+            </div>
+            <% if defined?(@recent_orders) && @recent_orders.present? %>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Total Orders</span>
+              <span class="font-medium text-gray-900"><%= current_user.orders.count %></span>
+            </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Preferences Summary -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Preferences</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Email Notifications</span>
+              <% if @user.email_notifications? %>
+                <span class="text-green-600"><i class="fas fa-check"></i></span>
+              <% else %>
+                <span class="text-gray-400"><i class="fas fa-times"></i></span>
+              <% end %>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Marketing Emails</span>
+              <% if @user.marketing_emails? %>
+                <span class="text-green-600"><i class="fas fa-check"></i></span>
+              <% else %>
+                <span class="text-gray-400"><i class="fas fa-times"></i></span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
