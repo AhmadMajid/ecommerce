@@ -9,6 +9,7 @@ class NewslettersController < ApplicationController
           redirect_back(fallback_location: root_path)
         end
         format.json { render json: { status: 'success', message: 'Successfully subscribed!' } }
+        format.js   { render json: { status: 'success', message: 'Successfully subscribed!' } }
       end
     else
       respond_to do |format|
@@ -17,6 +18,7 @@ class NewslettersController < ApplicationController
           redirect_back(fallback_location: root_path)
         end
         format.json { render json: { status: 'error', errors: @newsletter.errors.full_messages } }
+        format.js   { render json: { status: 'error', errors: @newsletter.errors.full_messages } }
       end
     end
   end

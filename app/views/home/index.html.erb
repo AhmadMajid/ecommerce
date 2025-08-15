@@ -477,15 +477,40 @@
       Get exclusive access to new arrivals, special offers, and style tips delivered straight to your inbox.
     </p>
 
-    <%= form_with model: Newsletter.new, url: newsletters_path, local: true, class: "max-w-md mx-auto flex gap-4" do |form| %>
+
+    <div id="newsletter-flash" class="mb-4"></div>
+  <%= form_with model: Newsletter.new, url: newsletters_path, local: false, html: { id: "newsletter-form", autocomplete: "off" }, data: { type: :json }, class: "max-w-md mx-auto flex gap-4" do |form| %>
       <%= form.email_field :email,
              placeholder: "Enter your email address",
-             class: "flex-1 px-6 py-4 rounded-xl border-2 border-white border-opacity-30 bg-white bg-opacity-10 backdrop-blur-lg text-white placeholder-purple-200 focus:ring-2 focus:ring-yellow-400 focus:bg-opacity-20 focus:border-yellow-400 transition-all",
-             required: true %>
+             class: "flex-1 px-6 py-4 rounded-xl border-2 border-white border-opacity-30 bg-white bg-opacity-10 backdrop-blur-lg text-purple-900 placeholder-purple-400 focus:ring-2 focus:ring-yellow-400 focus:bg-opacity-20 focus:border-yellow-400 transition-all",
+             required: true, autocomplete: "off" %>
 
       <%= form.submit "Subscribe",
               class: "px-8 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-xl hover:from-yellow-300 hover:to-orange-400 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" %>
     <% end %>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var form = document.getElementById("newsletter-form");
+        if (form) {
+          form.addEventListener("ajax:success", function(event) {
+            var detail = event.detail;
+            var data = detail[0];
+            var flash = document.getElementById("newsletter-flash");
+            if (data.status === 'success') {
+              flash.innerHTML = '<div class="form-success bg-green-100 text-green-800 rounded-lg px-4 py-3 mb-2">' + data.message + '</div>';
+              form.reset();
+            } else {
+              flash.innerHTML = '<div class="form-error bg-red-100 text-red-800 rounded-lg px-4 py-3 mb-2">' + (data.errors ? data.errors.join(', ') : 'An error occurred.') + '</div>';
+            }
+          });
+          form.addEventListener("ajax:error", function(event) {
+            var flash = document.getElementById("newsletter-flash");
+            flash.innerHTML = '<div class="form-error bg-red-100 text-red-800 rounded-lg px-4 py-3 mb-2">An error occurred. Please try again.</div>';
+          });
+        }
+      });
+    </script>
 
     <p class="text-sm text-purple-200 mt-4">
       No spam, unsubscribe at any time. We respect your privacy.
