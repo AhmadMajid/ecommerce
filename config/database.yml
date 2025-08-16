@@ -81,18 +81,23 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: ecommerce_app_production
-    username: ecommerce_app
-    password: <%= ENV["ECOMMERCE_APP_DATABASE_PASSWORD"] %>
+    url: <%= ENV["DATABASE_URL"] %>
+    # Supabase connection settings
+    database: <%= ENV["SUPABASE_DB_NAME"] || "postgres" %>
+    username: <%= ENV["SUPABASE_DB_USER"] || "postgres" %>
+    password: <%= ENV["SUPABASE_DB_PASSWORD"] %>
+    host: <%= ENV["SUPABASE_DB_HOST"] %>
+    port: <%= ENV["SUPABASE_DB_PORT"] || "5432" %>
+    sslmode: require
   cache:
     <<: *primary_production
-    database: ecommerce_app_production_cache
+    database: <%= ENV["SUPABASE_DB_NAME"] || "postgres" %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: ecommerce_app_production_queue
+    database: <%= ENV["SUPABASE_DB_NAME"] || "postgres" %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: ecommerce_app_production_cable
+    database: <%= ENV["SUPABASE_DB_NAME"] || "postgres" %>
     migrations_paths: db/cable_migrate

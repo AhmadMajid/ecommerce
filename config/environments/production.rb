@@ -87,4 +87,18 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # Vercel deployment configurations
+  if ENV['VERCEL']
+    # Allow Vercel preview deployments
+    config.hosts.clear
+    config.hosts << /.*\.vercel\.app$/
+    config.hosts << /localhost/
+    
+    # Serve static files for Vercel
+    config.public_file_server.enabled = true
+    
+    # Use Vercel's asset host if configured
+    config.asset_host = ENV['VERCEL_URL'] if ENV['VERCEL_URL'].present?
+  end
 end

@@ -1,0 +1,14 @@
+{
+  "name": "rails-ecommerce-app",
+  "version": "1.0.0",
+  "description": "Rails Ecommerce Application with Stripe Integration",
+  "scripts": {
+    "build": "bundle install && RAILS_ENV=production rails assets:precompile",
+    "start": "bundle exec puma -C config/puma.rb"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "ruby": "3.4.5"
+  },
+  "private": true
+}

@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  # Health check for deployment platforms
+  get '/health', to: 'health#index'
+  get '/up', to: 'health#index' # Alternative endpoint
+  
   # Devise routes for user authentication
   devise_for :users, controllers: {
     registrations: 'users/registrations',

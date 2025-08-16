@@ -92,3 +92,8 @@ group :development do
   gem "better_errors"
   gem "binding_of_caller"
 end
+
+group :production do
+  # Add gems specific to production deployment
+  gem 'rails_12factor' # Helps with logging and static assets on Heroku/Vercel
+end
