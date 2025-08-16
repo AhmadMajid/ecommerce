@@ -1,0 +1,96 @@
+# Dependencies and vendor files
+node_modules/
+vendor/
+
+# Temporary and cache files
+tmp/
+log/
+.tmp/
+.cache/
+
+# Development and test files
+spec/
+test/
+coverage/
+.rspec
+.simplecov
+
+# Git and version control
+.git/
+.github/
+
+# Environment files
+.env*
+!.env.production.template
+
+# Database files
+db/*.sqlite3
+db/*.sqlite3-*
+
+# Generated files
+public/assets/
+public/packs/
+public/packs-test/
+
+# Storage and uploads
+storage/
+public/uploads/
+
+# Build files
+bin/
+script/
+
+# Documentation
+*.md
+!README.md
+DEPLOYMENT_GUIDE.md
+CART_*.md
+CHECKOUT_*.md
+DEBUGGING_*.md
+EMAIL_*.md
+FIXES_*.md
+INTEGRATION_*.md
+PAYMENT_*.md
+RSPEC_*.md
+SETUP_*.md
+STIMULUS_*.md
+STRIPE_*.md
+TEST_*.md
+UI_*.md
+
+# Test and debug files
+debug_*.rb
+test_*.rb
+cleanup_*.rb
+create_*.rb
+manual_*.rb
+send_*.rb
+setup_*.rb
+stripe_test.rb
+*.sh
+
+# Logs and temporary files
+*.log
+cookies.txt
+server.log
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ruby specific
+*.gem
+*.rbc
+.bundle/
+.byebug_history
+.irb_history
+Gemfile.backup
+
+# Procfiles for development
+Procfile.dev
