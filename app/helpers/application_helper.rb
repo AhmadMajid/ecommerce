@@ -47,4 +47,35 @@ module ApplicationHelper
 
     options
   end
+
+  def country_name(country_code)
+    case country_code
+    when 'US' then 'United States'
+    when 'CA' then 'Canada'
+    when 'GB' then 'United Kingdom'
+    when 'AU' then 'Australia'
+    when 'DE' then 'Germany'
+    when 'FR' then 'France'
+    when 'JP' then 'Japan'
+    when 'BR' then 'Brazil'
+    when 'MX' then 'Mexico'
+    when 'IN' then 'India'
+    else country_code
+    end
+  end
+
+  def country_options
+    [
+      ['United States', 'US'],
+      ['Canada', 'CA'],
+      ['United Kingdom', 'GB'],
+      ['Australia', 'AU'],
+      ['Germany', 'DE'],
+      ['France', 'FR'],
+      ['Japan', 'JP'],
+      ['Brazil', 'BR'],
+      ['Mexico', 'MX'],
+      ['India', 'IN']
+    ]
+  end
 end

@@ -36,8 +36,24 @@ class Address < ApplicationRecord
     "#{first_name} #{last_name}".strip
   end
 
+  def country_name
+    case country
+    when 'US' then 'United States'
+    when 'CA' then 'Canada'
+    when 'GB' then 'United Kingdom'
+    when 'AU' then 'Australia'
+    when 'DE' then 'Germany'
+    when 'FR' then 'France'
+    when 'JP' then 'Japan'
+    when 'BR' then 'Brazil'
+    when 'MX' then 'Mexico'
+    when 'IN' then 'India'
+    else country
+    end
+  end
+
   def single_line_address
-    [address_line_1, address_line_2, city, state_province, postal_code, country].compact.join(', ')
+    [address_line_1, address_line_2, city, state_province, postal_code, country_name].compact.join(', ')
   end
 
   def formatted_address
@@ -46,7 +62,7 @@ class Address < ApplicationRecord
     lines << address_line_1
     lines << address_line_2 if address_line_2.present?
     lines << "#{city}, #{state_province} #{postal_code}"
-    lines << country
+    lines << country_name
     lines.join("\n")
   end
 

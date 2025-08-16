@@ -238,7 +238,7 @@ class CheckoutController < ApplicationController
       city: '',
       state_province: '',
       postal_code: '',
-      country: 'United States',
+      country: 'US',
       phone: ''
     )
   end

@@ -64,7 +64,7 @@
                 <p class="text-sm text-gray-600">
                   <%= address.city %>, <%= address.state_province %> <%= address.postal_code %>
                 </p>
-                <p class="text-sm text-gray-600"><%= address.country %></p>
+                <p class="text-sm text-gray-600"><%= address.country_name %></p>
                 <% if address.phone.present? %>
                   <p class="text-sm text-gray-600">Phone: <%= address.phone %></p>
                 <% end %>
@@ -157,7 +157,7 @@
                 <p class="text-sm text-gray-600">
                   <%= address.city %>, <%= address.state_province %> <%= address.postal_code %>
                 </p>
-                <p class="text-sm text-gray-600"><%= address.country %></p>
+                <p class="text-sm text-gray-600"><%= address.country_name %></p>
                 <% if address.phone.present? %>
                   <p class="text-sm text-gray-600">Phone: <%= address.phone %></p>
                 <% end %>

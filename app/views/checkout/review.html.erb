@@ -119,7 +119,7 @@
                   <p><%= @checkout.shipping_address_data['address_line_2'] %></p>
                 <% end %>
                 <p><%= @checkout.shipping_address_data['city'] %>, <%= @checkout.shipping_address_data['state_province'] %> <%= @checkout.shipping_address_data['postal_code'] %></p>
-                <p><%= @checkout.shipping_address_data['country'] %></p>
+                <p><%= country_name(@checkout.shipping_address_data['country']) %></p>
                 <% if @checkout.shipping_address_data['phone'].present? %>
                   <p class="mt-2">Phone: <%= @checkout.shipping_address_data['phone'] %></p>
                 <% end %>

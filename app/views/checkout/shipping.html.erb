@@ -51,6 +51,52 @@
           <p class="mt-1 text-sm text-gray-600">Where should we deliver your order?</p>
         </div>
 
+        <% if current_user.addresses.shipping.any? %>
+          <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h3 class="text-base font-medium text-gray-900 mb-3">Use a saved address</h3>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <% current_user.addresses.shipping.each do |address| %>
+                <div class="relative">
+                  <button type="button" 
+                          class="use-saved-address w-full p-3 text-left border rounded-lg hover:bg-white hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors <%= 'border-indigo-300 bg-white' if address.default_address? %>"
+                          data-address='<%= {
+                            first_name: address.first_name,
+                            last_name: address.last_name,
+                            company: address.company,
+                            phone: address.phone,
+                            address_line_1: address.address_line_1,
+                            address_line_2: address.address_line_2,
+                            city: address.city,
+                            state_province: address.state_province,
+                            postal_code: address.postal_code,
+                            country: address.country
+                          }.to_json %>'>
+                    <div class="flex items-start justify-between">
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-gray-900"><%= address.full_name %></p>
+                        <% if address.company.present? %>
+                          <p class="text-sm text-gray-600"><%= address.company %></p>
+                        <% end %>
+                        <p class="text-sm text-gray-600"><%= address.address_line_1 %></p>
+                        <p class="text-sm text-gray-600"><%= address.city %>, <%= address.state_province %> <%= address.postal_code %></p>
+                        <p class="text-sm text-gray-600"><%= address.country_name %></p>
+                      </div>
+                      <% if address.default_address? %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          Default
+                        </span>
+                      <% end %>
+                    </div>
+                  </button>
+                </div>
+              <% end %>
+            </div>
+            <div class="mt-3">
+              <p class="text-sm text-gray-500">Click on an address to use it, or enter a new address below.</p>
+            </div>
+          </div>
+        <% end %>
+
         <div class="px-6 py-6">
           <%= form_with url: update_shipping_checkout_index_path, method: :patch, local: true, class: "space-y-6" do |form| %>
             <!-- Contact Information -->
@@ -127,15 +173,7 @@
                 <div>
                   <%= form.label :country, "Country", class: "block text-sm font-medium text-gray-700" %>
                   <%= form.select :country,
-                      options_for_select([
-                        ['United States', 'United States'],
-                        ['Canada', 'Canada'],
-                        ['United Kingdom', 'United Kingdom'],
-                        ['Australia', 'Australia'],
-                        ['Germany', 'Germany'],
-                        ['France', 'France'],
-                        ['Japan', 'Japan']
-                      ], @address.country),
+                      options_for_select(country_options, @address.country),
                       {},
                       { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
                         required: true } %>
@@ -198,3 +236,41 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle saved address selection
+  const addressButtons = document.querySelectorAll('.use-saved-address');
+  
+  addressButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const addressData = JSON.parse(this.dataset.address);
+      
+      // Remove active class from all buttons
+      addressButtons.forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-500', 'bg-indigo-50');
+        btn.classList.add('border-gray-300');
+      });
+      
+      // Add active class to clicked button
+      this.classList.remove('border-gray-300');
+      this.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500', 'bg-indigo-50');
+      
+      // Fill the form with address data
+      document.querySelector('input[name="address[first_name]"]').value = addressData.first_name || '';
+      document.querySelector('input[name="address[last_name]"]').value = addressData.last_name || '';
+      document.querySelector('input[name="address[company]"]').value = addressData.company || '';
+      document.querySelector('input[name="address[phone]"]').value = addressData.phone || '';
+      document.querySelector('input[name="address[address_line_1]"]').value = addressData.address_line_1 || '';
+      document.querySelector('input[name="address[address_line_2]"]').value = addressData.address_line_2 || '';
+      document.querySelector('input[name="address[city]"]').value = addressData.city || '';
+      document.querySelector('input[name="address[state_province]"]').value = addressData.state_province || '';
+      document.querySelector('input[name="address[postal_code]"]').value = addressData.postal_code || '';
+      document.querySelector('select[name="address[country]"]').value = addressData.country || '';
+      
+      // Scroll to form
+      document.querySelector('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+});
+</script>

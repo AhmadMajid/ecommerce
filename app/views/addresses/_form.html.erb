@@ -114,18 +114,7 @@
         <div>
           <%= form.label :country, "Country", class: "block text-sm font-medium text-gray-700" %>
           <%= form.select :country,
-              options_for_select([
-                ['United States', 'United States'],
-                ['Canada', 'Canada'],
-                ['United Kingdom', 'United Kingdom'],
-                ['Australia', 'Australia'],
-                ['Germany', 'Germany'],
-                ['France', 'France'],
-                ['Japan', 'Japan'],
-                ['Brazil', 'Brazil'],
-                ['Mexico', 'Mexico'],
-                ['India', 'India']
-              ], @address.country),
+              options_for_select(country_options, @address.country),
               {},
               { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
                 required: true } %>
