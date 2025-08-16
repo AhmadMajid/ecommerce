@@ -1,0 +1,155 @@
+<% content_for :title, "Order ##{@order.order_number}" %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <%= link_to orders_path, class: "text-indigo-600 hover:text-indigo-700 text-sm font-medium mb-4 inline-block" do %>
+      ← Back to Orders
+    <% end %>
+    
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Order #<%= @order.order_number %></h1>
+        <p class="text-gray-600 mt-2">
+          Placed on <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+        </p>
+      </div>
+      <div class="text-right">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+          <%= case @order.status
+              when 'pending' then 'bg-yellow-100 text-yellow-800'
+              when 'confirmed', 'processing' then 'bg-blue-100 text-blue-800'
+              when 'shipped' then 'bg-purple-100 text-purple-800'
+              when 'delivered' then 'bg-green-100 text-green-800'
+              when 'cancelled' then 'bg-red-100 text-red-800'
+              else 'bg-gray-100 text-gray-800'
+              end %>">
+          <%= @order.status.humanize %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Order Items -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Items</h2>
+        
+        <div class="space-y-4">
+          <% @order.order_items.each do |item| %>
+            <div class="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0">
+              <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                <% if item.product.images.attached? %>
+                  <%= image_tag item.product.images.first, class: "w-full h-full object-cover rounded-lg", alt: item.product_name %>
+                <% else %>
+                  <span class="text-gray-400 text-xs">No Image</span>
+                <% end %>
+              </div>
+              
+              <div class="flex-1">
+                <h4 class="font-medium text-gray-900"><%= item.product_name %></h4>
+                <% if item.variant_title.present? %>
+                  <p class="text-sm text-gray-500"><%= item.variant_title %></p>
+                <% end %>
+                <p class="text-sm text-gray-500">SKU: <%= item.product_sku %></p>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-sm text-gray-500">Qty</div>
+                <div class="font-medium"><%= item.quantity %></div>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-sm text-gray-500">Price</div>
+                <div class="font-medium">$<%= item.unit_price %></div>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-sm text-gray-500">Total</div>
+                <div class="font-medium">$<%= item.total_price %></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary & Details -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- Order Summary -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+        
+        <div class="space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="text-gray-900">$<%= @order.subtotal %></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Tax</span>
+            <span class="text-gray-900">$<%= @order.tax_amount %></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Shipping</span>
+            <span class="text-gray-900">
+              <% if @order.shipping_amount > 0 %>
+                $<%= @order.shipping_amount %>
+              <% else %>
+                Free
+              <% end %>
+            </span>
+          </div>
+          <div class="border-t border-gray-200 pt-2">
+            <div class="flex justify-between text-lg font-semibold">
+              <span class="text-gray-900">Total</span>
+              <span class="text-gray-900">$<%= @order.total %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <% if @order.shipping_address.present? %>
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Shipping Address</h2>
+          <div class="text-sm text-gray-600">
+            <% address = @order.shipping_address %>
+            <p class="font-medium text-gray-900"><%= "#{address[:first_name]} #{address[:last_name]}" %></p>
+            <% if address[:company].present? %>
+              <p><%= address[:company] %></p>
+            <% end %>
+            <p><%= address[:address_line_1] %></p>
+            <% if address[:address_line_2].present? %>
+              <p><%= address[:address_line_2] %></p>
+            <% end %>
+            <p><%= "#{address[:city]}, #{address[:state_province]} #{address[:postal_code]}" %></p>
+            <p><%= address[:country] %></p>
+            <% if address[:phone].present? %>
+              <p><%= address[:phone] %></p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Payment Status -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Status</h2>
+        <div class="space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Payment Status</span>
+            <span class="font-medium
+              <%= @order.payment_paid? ? 'text-green-600' : 'text-yellow-600' %>">
+              <%= @order.payment_status.humanize %>
+            </span>
+          </div>
+          <% if @order.stripe_payment_intent_id %>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Payment Method</span>
+              <span class="text-gray-900">Card</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

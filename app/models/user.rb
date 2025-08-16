@@ -20,7 +20,7 @@ class User < ApplicationRecord
   has_many :wishlists, dependent: :destroy
   has_many :wishlist_products, through: :wishlists, source: :product
   has_many :reviews, dependent: :destroy
-  # has_many :orders, dependent: :destroy # temporarily disabled
+  has_many :orders, dependent: :destroy
 
   # Helper methods for default addresses
   has_one :default_billing_address, -> { where(address_type: 'billing', default_address: true) },

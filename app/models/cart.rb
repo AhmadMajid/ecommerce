@@ -5,6 +5,7 @@ class Cart < ApplicationRecord
   has_many :cart_items, dependent: :destroy
   alias_method :items, :cart_items  # Alias for easier access
   has_many :products, through: :cart_items
+  has_one :checkout, dependent: :destroy
 
   # Enums
   enum :status, {

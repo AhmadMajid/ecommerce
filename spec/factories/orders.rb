@@ -1,11 +1,16 @@
 FactoryBot.define do
   factory :order do
     association :user
-    association :shipping_method
+    sequence(:order_number) { |n| "ORD-#{n.to_s.rjust(6, '0')}" }
     email { user.email }
     status { 'pending' }
-    total_amount { 100.00 }
-    shipping_address { { 'street' => '123 Test St', 'city' => 'Test City', 'state' => 'TS', 'zip' => '12345' } }
-    billing_address { { 'street' => '123 Test St', 'city' => 'Test City', 'state' => 'TS', 'zip' => '12345' } }
+    payment_status { 'payment_pending' }
+    fulfillment_status { 'unfulfilled' }
+    currency { 'USD' }
+    total { 100.00 }
+    subtotal { 80.00 }
+    tax_amount { 10.00 }
+    shipping_amount { 10.00 }
+    discount_amount { 0.00 }
   end
 end

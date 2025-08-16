@@ -81,6 +81,7 @@ group :test do
   gem "selenium-webdriver"
   gem "shoulda-matchers"
   gem "rails-controller-testing"
+  gem "database_cleaner-active_record"
 end
 
 group :development do

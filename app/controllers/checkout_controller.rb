@@ -15,97 +15,131 @@ class CheckoutController < ApplicationController
   def shipping
     @checkout.update(status: 'shipping_info') unless @checkout.shipping_info?
     @address = build_shipping_address
+    @shipping_methods = ShippingMethod.active
+    
+    # Set default shipping method if none selected
+    if @checkout.shipping_method_id.blank? && @shipping_methods.any?
+      @checkout.update(shipping_method_id: @shipping_methods.first.id)
+    end
   end
 
   def update_shipping
-    address_params = params.require(:address).permit(
-      :first_name, :last_name, :company, :address_line_1, :address_line_2,
-      :city, :state_province, :postal_code, :country, :phone
-    )
+    address_params = if params[:address].present?
+      # Handle nested address params from forms
+      params.require(:address).permit(
+        :first_name, :last_name, :company, :address_line_1, :address_line_2,
+        :city, :state_province, :postal_code, :country, :phone
+      ).merge(
+        shipping_method_id: params[:shipping_method_id]
+      ).compact
+    else
+      # Handle flat params structure
+      params.permit(
+        :first_name, :last_name, :company, :address_line_1, :address_line_2,
+        :city, :state_province, :postal_code, :country, :phone, :shipping_method_id
+      )
+    end
 
-    @checkout.shipping_address_data = address_params.to_h
-    @checkout.shipping_method_id = params[:shipping_method_id] if params[:shipping_method_id].present?
+    @checkout.shipping_address_data = address_params.except(:shipping_method_id).to_h
+    @checkout.shipping_method_id = address_params[:shipping_method_id] if address_params[:shipping_method_id].present?
 
     if @checkout.save
       @checkout.update(status: 'payment_info')
       redirect_to payment_checkout_index_path, notice: 'Shipping information saved successfully.'
     else
-      @address = OpenStruct.new(address_params.to_h)
+      @address = OpenStruct.new(address_params.except(:shipping_method_id).to_h)
       flash.now[:alert] = 'Please correct the errors below.'
       render :shipping, status: :unprocessable_entity
     end
   end
 
   def payment
-    redirect_to shipping_checkout_index_path, alert: 'Please complete shipping information first.' unless @checkout.can_proceed_to_payment?
+    unless @checkout.can_proceed_to_payment?
+      redirect_to shipping_checkout_index_path, alert: 'Please complete shipping information first.'
+      return
+    end
+    
     @checkout.update(status: 'payment_info') unless @checkout.payment_info?
+    
+    # Create checkout service
+    checkout_service = CheckoutService.new(current_cart, current_user)
+    
+    # Calculate totals for display
+    @totals = checkout_service.calculate_totals
+    
+    # If we already have an order, load it
+    if @checkout.order_id
+      @order = Order.find(@checkout.order_id)
+    end
+    
+    # Note: Order creation will happen in the complete action, not here
+    
+    # Get Stripe publishable key for frontend
+    @stripe_publishable_key = Rails.application.config.stripe_publishable_key
   end
 
   def update_payment
-    # For now, we'll just mark payment as completed
-    # In a real application, you'd integrate with a payment processor here
-    @checkout.payment_method = params[:payment_method] || 'credit_card'
+    # This will be handled by Stripe on the frontend
+    # We'll just update the checkout status to review
     @checkout.status = 'review'
-
-    # Set billing address (for now, same as shipping)
     @checkout.billing_address_data = @checkout.shipping_address_data
+    @checkout.payment_method = params[:payment_method] if params[:payment_method].present?
 
     if @checkout.save
-      redirect_to review_checkout_index_path, notice: 'Payment information saved successfully.'
+      redirect_to review_checkout_index_path, notice: 'Ready for payment confirmation.'
     else
+      # Set up required instance variables for rendering payment template
+      checkout_service = CheckoutService.new(current_cart, current_user)
+      @totals = checkout_service.calculate_totals
+      
       flash.now[:alert] = 'Please correct the errors below.'
       render :payment, status: :unprocessable_entity
     end
   end
 
   def review
-    redirect_to shipping_checkout_index_path, alert: 'Please complete all previous steps.' unless @checkout.can_proceed_to_review?
+    unless @checkout.can_proceed_to_review?
+      redirect_to shipping_checkout_index_path, alert: 'Please complete all previous steps.'
+      return
+    end
+    
     @checkout.update(status: 'review') unless @checkout.review?
+    
+    # Load or prepare order data for display
+    if @checkout.order_id
+      @order = Order.find(@checkout.order_id)
+    end
+    
+    # Calculate totals for display even if no order exists yet
+    checkout_service = CheckoutService.new(current_cart, current_user)
+    @totals = checkout_service.calculate_totals
   end
 
   def complete
-    Rails.logger.debug "Complete action called, @checkout: #{@checkout.inspect}"
-    Rails.logger.debug "Checkout status: #{@checkout.status.inspect}, review?: #{@checkout.review?}" if @checkout
-
     unless @checkout.review?
       redirect_to review_checkout_index_path, alert: 'Please review your order first.'
       return
     end
 
-    begin
-      ActiveRecord::Base.transaction do
-        # Create the order from the checkout
-        Rails.logger.debug "About to create order from checkout"
-        # Re-enable order creation now that tables exist
+    # Get or create the order
+    order = @checkout.order_id ? Order.find(@checkout.order_id) : nil
+    
+    unless order
+      # Create order using the helper method
+      begin
         order = create_order_from_checkout
-        Rails.logger.debug "Order created successfully: #{order.id}"
-
-        # Mark the cart as converted instead of deleting it
-        Rails.logger.debug "About to mark cart as converted: #{@checkout.cart.inspect}"
-        if @checkout.cart.persisted?
-          @checkout.cart.update!(status: 'converted')
-          Rails.logger.debug "Cart status updated to: #{@checkout.cart.reload.status}"
-        end
-        session.delete(:cart_id) if session[:cart_id]
-
-        # Mark checkout as completed
-        Rails.logger.debug "Updating checkout status to completed"
-        Rails.logger.debug "Checkout before update: #{@checkout.inspect}"
-        @checkout.update!(
-          status: 'completed',
-          completed_at: Time.current
-        )
-        Rails.logger.debug "Checkout status updated: #{@checkout.reload.status}"
+      rescue => e
+        Rails.logger.error "Order creation failed: #{e.message}"
+        Rails.logger.error "Full error: #{e.class}: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        redirect_to review_checkout_index_path, alert: "There was an error completing your order: #{e.message}"
+        return
       end
-
-      Rails.logger.debug "Redirecting to root with success message"
-      redirect_to root_path, notice: 'Order completed successfully! This was a demo checkout - no real payment was processed.'
-    rescue => e
-      Rails.logger.error "Checkout completion failed: #{e.message}"
-      Rails.logger.error e.backtrace.join("
-")
-      redirect_to review_checkout_index_path, alert: 'There was an error completing your order. Please try again.'
     end
+
+    # Complete the order (this will set statuses and clear cart)
+    complete_order(order)
+    redirect_to root_path, notice: 'Order completed successfully! You will receive a confirmation email shortly.'
   end
 
   def apply_coupon
@@ -145,8 +179,33 @@ class CheckoutController < ApplicationController
 
   private
 
+  def complete_order(order)
+    ActiveRecord::Base.transaction do
+      # Mark order as confirmed
+      order.update!(
+        status: :confirmed,
+        payment_status: :paid
+      )
+      
+      # Mark cart as converted
+      if @checkout.cart.persisted?
+        @checkout.cart.update!(status: 'converted')
+      end
+      session.delete(:cart_id) if session[:cart_id]
+      
+      # Mark checkout as completed
+      @checkout.update!(
+        status: 'completed',
+        completed_at: Time.current
+      )
+      
+      # Send confirmation email
+      OrderMailer.confirmation_email(order).deliver_later if defined?(OrderMailer)
+    end
+  end
+
   def ensure_cart_not_empty
-    if current_cart.items.empty?
+    if current_cart.cart_items.empty?
       redirect_to cart_path, alert: 'Your cart is empty. Please add items before checkout.'
     end
   end

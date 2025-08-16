@@ -76,6 +76,9 @@ Rails.application.routes.draw do
   # Newsletter subscription
   resources :newsletters, only: [:create]
   
+  # Webhooks
+  post '/webhooks/stripe', to: 'webhooks#stripe'
+  
   # User profile routes
   resource :profile, only: [:show, :edit, :update], controller: 'users/profile' do
     member do
@@ -90,6 +93,15 @@ Rails.application.routes.draw do
       patch :set_default
     end
   end
+
+  # Order management
+  resources :orders, only: [:index, :show]
+
+  # Webhooks
+  namespace :webhooks do
+    post 'stripe', to: 'webhooks#stripe'
+  end
+  post '/webhooks/stripe', to: 'webhooks#stripe'
 
   # Admin routes
   namespace :admin do
@@ -133,6 +145,14 @@ Rails.application.routes.draw do
 
       collection do
         post :bulk_action
+      end
+    end
+
+    # Orders management
+    resources :orders, only: [:index, :show, :edit, :update] do
+      member do
+        patch :cancel
+        patch :refund
       end
     end
   end

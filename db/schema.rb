@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_15_180552) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_16_103519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -148,9 +148,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_180552) do
     t.datetime "completed_at"
     t.string "coupon_code"
     t.bigint "coupon_id"
+    t.bigint "order_id"
     t.index ["cart_id"], name: "index_checkouts_on_cart_id"
     t.index ["coupon_id"], name: "index_checkouts_on_coupon_id"
     t.index ["expires_at"], name: "index_checkouts_on_expires_at"
+    t.index ["order_id"], name: "index_checkouts_on_order_id"
     t.index ["session_id", "status"], name: "index_checkouts_on_session_id_and_status"
     t.index ["shipping_method_id"], name: "index_checkouts_on_shipping_method_id"
     t.index ["user_id", "status"], name: "index_checkouts_on_user_id_and_status"
@@ -234,6 +236,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_180552) do
     t.decimal "discount_amount", precision: 10, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_customer_id"
     t.index ["email"], name: "index_orders_on_email"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["payment_status"], name: "index_orders_on_payment_status"
@@ -438,6 +442,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_180552) do
   add_foreign_key "categories", "categories", column: "parent_id"
   add_foreign_key "checkouts", "carts"
   add_foreign_key "checkouts", "coupons"
+  add_foreign_key "checkouts", "orders"
   add_foreign_key "checkouts", "shipping_methods"
   add_foreign_key "checkouts", "users"
   add_foreign_key "order_items", "orders"

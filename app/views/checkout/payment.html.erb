@@ -35,6 +35,155 @@
 
         <!-- Review Step -->
         <div class="flex items-center">
+          <div class="flex items-center justify-center w-8 h-8 bg-gray-200 text-gray-600 rounded-full">
+            <span class="text-sm font-medium">3</span>
+          </div>
+          <span class="ml-2 text-sm font-medium text-gray-500">Review</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Payment Information -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Payment Information</h2>
+        
+        <!-- Stripe Payment Element -->
+        <div id="payment-element" class="mb-4">
+          <!-- Stripe Elements will mount here -->
+        </div>
+        
+        <div id="payment-errors" role="alert" class="text-red-600 text-sm mb-4" style="display: none;"></div>
+        
+        <!-- Payment Button -->
+        <div class="mt-6">
+          <button id="pay-button" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <span id="button-text">Pay $<%= @totals[:total] %></span>
+            <span id="loading-spinner" class="hidden">Processing...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="lg:col-span-1">
+      <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 sticky top-4">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+        
+        <!-- Cart Items -->
+        <div class="space-y-3 mb-4">
+          <% current_cart.cart_items.each do |item| %>
+            <div class="flex items-center space-x-3">
+              <% if item.product.images.attached? %>
+                <%= image_tag item.product.images.first, class: "w-12 h-12 object-cover rounded-lg", alt: item.product.name %>
+              <% else %>
+                <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <span class="text-gray-400 text-xs">No Image</span>
+                </div>
+              <% end %>
+              <div class="flex-1">
+                <h4 class="text-sm font-medium text-gray-900"><%= item.product.name %></h4>
+                <p class="text-sm text-gray-500">Qty: <%= item.quantity %></p>
+              </div>
+              <div class="text-sm font-medium text-gray-900">
+                $<%= (item.quantity * item.product.price).to_f %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="border-t border-gray-200 pt-4 space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="text-gray-900">$<%= @totals[:subtotal] %></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Tax</span>
+            <span class="text-gray-900">$<%= @totals[:tax] %></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Shipping</span>
+            <span class="text-gray-900">
+              <% if @totals[:shipping] > 0 %>
+                $<%= @totals[:shipping] %>
+              <% else %>
+                Free
+              <% end %>
+            </span>
+          </div>
+          <div class="border-t border-gray-200 pt-2">
+            <div class="flex justify-between text-lg font-semibold">
+              <span class="text-gray-900">Total</span>
+              <span class="text-gray-900">$<%= @totals[:total] %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Stripe
+  const stripe = Stripe('<%= @stripe_publishable_key %>');
+  
+  // Create elements instance
+  const elements = stripe.elements({
+    clientSecret: '<%= @order.payment_intent.client_secret if @order&.payment_intent %>'
+  });
+
+  // Create and mount the payment element
+  const paymentElement = elements.create('payment');
+  paymentElement.mount('#payment-element');
+
+  // Handle form submission
+  const payButton = document.getElementById('pay-button');
+  const buttonText = document.getElementById('button-text');
+  const loadingSpinner = document.getElementById('loading-spinner');
+  const errorElement = document.getElementById('payment-errors');
+
+  payButton.addEventListener('click', async function(e) {
+    e.preventDefault();
+    
+    // Disable button and show loading
+    payButton.disabled = true;
+    buttonText.style.display = 'none';
+    loadingSpinner.style.display = 'inline';
+    
+    const {error} = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: '<%= complete_checkout_index_url %>'
+      }
+    });
+
+    if (error) {
+      // Show error to customer
+      errorElement.textContent = error.message;
+      errorElement.style.display = 'block';
+      
+      // Re-enable button
+      payButton.disabled = false;
+      buttonText.style.display = 'inline';
+      loadingSpinner.style.display = 'none';
+    }
+  });
+});
+</script>
+
+        <!-- Arrow -->
+        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+
+        <!-- Review Step -->
+        <div class="flex items-center">
           <div class="flex items-center justify-center w-8 h-8 bg-gray-300 text-gray-500 rounded-full">
             <span class="text-sm font-medium">3</span>
           </div>

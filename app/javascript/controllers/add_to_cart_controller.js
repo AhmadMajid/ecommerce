@@ -170,11 +170,11 @@ export default class extends Controller {
   getMaxQuantity() {
     if (this.hasVariantSelectTarget && this.variantSelectTarget.value) {
       const variant = this.variantsValue.find(v => v.id == this.variantSelectTarget.value)
-      return variant ? variant.stock_quantity : 0
+      return variant ? variant.inventory_quantity : 0
     }
 
-    // Return the base product stock if no variants
-    return this.element.dataset.stockQuantity ? parseInt(this.element.dataset.stockQuantity) : 0
+    // Return the base product inventory if no variants
+    return this.element.dataset.inventoryQuantity ? parseInt(this.element.dataset.inventoryQuantity) : 0
   }
 
   getSelectedVariantPrice() {
